@@ -23,7 +23,7 @@ class Pawn(Piece):
             print()
     
     def __str__(self):
-        return self.color + " pawn @ " + chr(97+self.letter) +","+ self.number.__str__()
+        return self.color + " pawn @ " + chr(96+self.letter) +","+ self.number.__str__() # 96 Because the letter a is 97, and letter is 1 indexed
 
         
 
@@ -40,7 +40,7 @@ class King(Piece):
             print()
     
     def __str__(self):
-        return self.color + " King @ " + chr(97+self.letter) +","+ self.number.__str__()
+        return self.color + " King @ " + chr(96+self.letter) +","+ self.number.__str__()
 
 
 
@@ -59,7 +59,7 @@ class Queen(Piece):
             print()
     
     def __str__(self):
-        return self.color + " Queen @ " + chr(97+self.letter) +","+ self.number.__str__()
+        return self.color + " Queen @ " + chr(96+self.letter) +","+ self.number.__str__()
 
 
         
@@ -77,7 +77,7 @@ class Bishop(Piece):
             print()
     
     def __str__(self):
-        return self.color + " Bishop @ " + chr(97+self.letter) +","+ self.number.__str__()
+        return self.color + " Bishop @ " + chr(96+self.letter) +","+ self.number.__str__()
 
 
 
@@ -96,7 +96,7 @@ class Knight(Piece):
             print()
     
     def __str__(self):
-        return self.color + "Knight @" + chr(97+self.letter) +","+ self.number.__str__()
+        return self.color + "Knight @" + chr(96+self.letter) +","+ self.number.__str__()
 
 
 
@@ -115,6 +115,6 @@ class Rook(Piece):
             print()
     
     def __str__(self):
-        return self.color + "Rook @" + chr(97+self.letter) +","+ self.number.__str__()
+        return self.color + "Rook @" + chr(96+self.letter) +","+ self.number.__str__()
 
 
