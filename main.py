@@ -16,6 +16,7 @@ BLACK_PIECES = []
 All_PIECES = [] # List of rects for collidepoint()
 clicked_piece = [] # selected piece list will never be greater than 1
 piece = None
+WhiteTurn = True
 
 def InitializeGameOfChess():
     WHITE_PIECES.clear()
@@ -23,16 +24,16 @@ def InitializeGameOfChess():
     for x in range(1, 9): # Do all the pawns
         WHITE_PIECES.append(Pawn("white", x, 2)) # X is really the letter but numbers work
         BLACK_PIECES.append(Pawn("black", x, 7))
-        if (x == 0 or x == 7):
+        if (x == 1 or x == 8):
             WHITE_PIECES.append(Rook("white", x, 1))
             BLACK_PIECES.append(Rook("black", x, 8))
-        elif(x == 1 or x == 6):
+        elif(x == 2 or x == 7):
             WHITE_PIECES.append(Knight("white", x, 1))
             BLACK_PIECES.append(Knight("black", x, 8))
-        elif(x == 2 or x == 5):
+        elif(x == 3 or x == 6):
             WHITE_PIECES.append(Bishop("white", x, 1))
             BLACK_PIECES.append(Bishop("black", x, 8))
-        elif(x == 3):
+        elif(x == 4):
             WHITE_PIECES.append(Queen("white", x, 1))
             BLACK_PIECES.append(Queen("black", x, 8))
         else:
@@ -95,16 +96,20 @@ def drawWindow():
     WIN.fill((255,255,255))
     drawChessBoard()
     drawChessPieces()
+    turn = myfont.render("White Turn", False, (0, 0, 0)) if WhiteTurn else myfont.render("Black Turn", False, (0, 0, 0))
+    WIN.blit(turn,(625,760))
     pygame.display.update()
 
-def pieceAt(tupSquare):
+def pieceAt(tupSquare, whoTurn):
     Xval, Yval = tupSquare
-    for x in range(len(WHITE_PIECES)): # Is there a white piece on that square
-        if(WHITE_PIECES[x].letter == Xval and WHITE_PIECES[x].number == Yval):
-            return WHITE_PIECES[x]
-    for x in range(len(BLACK_PIECES)): # Is there a black piece on that square
-        if(BLACK_PIECES[x].letter == Xval and BLACK_PIECES[x].number == Yval):
-            return BLACK_PIECES[x]
+    if(whoTurn):
+        for x in range(len(WHITE_PIECES)): # Is there a white piece on that square
+            if(WHITE_PIECES[x].letter == Xval and WHITE_PIECES[x].number == Yval):
+                return WHITE_PIECES[x]
+    else:
+        for x in range(len(BLACK_PIECES)): # Is there a black piece on that square
+            if(BLACK_PIECES[x].letter == Xval and BLACK_PIECES[x].number == Yval):
+                return BLACK_PIECES[x]
     return None
 
 # Make sure there is no piece on the same square that is the same color
@@ -123,17 +128,23 @@ def isValid(letter, number, color):
 def isCapture(letter, number, color):
     if(color == "white"):
         for x in range(len(BLACK_PIECES)):
+            print(x)
+            print(len(BLACK_PIECES))
             if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                 BLACK_PIECES.pop(x)
+                return  # Bug where after popping off list would continue through
     else:
         for x in range(len(WHITE_PIECES)):
             if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
                 WHITE_PIECES.pop(x)
+                return
 
-def clickOnPiece(pos):
+#pos is position of the mouse during an mousedown event
+# whoTurn is a boolean that is true during whites turn and false during blacks turn
+def clickOnPiece(pos, whoTurn):
     global piece
     square = whereClick(pos)
-    pieceTmp = pieceAt(square)
+    pieceTmp = pieceAt(square, whoTurn)
     if(pieceTmp != None):
         piece = pieceTmp
     #then is there a piece on that square
@@ -162,6 +173,7 @@ def whereClick(pos):
 
 def main():
     Running = True
+    global WhiteTurn
     clock = pygame.time.Clock()
     InitializeGameOfChess()
     while Running:
@@ -170,7 +182,7 @@ def main():
                 Running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                movingPiece = clickOnPiece(pos) # some time click on piece
+                movingPiece = clickOnPiece(pos, WhiteTurn) # some time click on piece
                 if(len(clicked_piece) > 0): # There is a piece selected, trying to move it
                     moveTo = whereClick(pos)
                     if(isValid(moveTo[0], moveTo[1], movingPiece.color)): # Not moving on top of teammate
@@ -179,8 +191,8 @@ def main():
                         movingPiece.letter = moveTo[0]
                         movingPiece.number = moveTo[1]
                         clicked_piece.clear()
-                        piece = None
-                        
+                        piece = None 
+                        WhiteTurn = False if WhiteTurn else True               
 
         clock.tick(30)
         drawWindow()
