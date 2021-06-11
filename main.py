@@ -112,6 +112,13 @@ def pieceAt(tupSquare, whoTurn):
                 return BLACK_PIECES[x]
     return None
 
+def squareInLegalMoves(attemptedMove, allowedMoves):
+    #is attempted move in allowed moves?
+    for x in range(len(allowedMoves)):
+        if(attemptedMove == allowedMoves[x]):
+            return True
+    return False
+
 # Make sure there is no piece on the same square that is the same color
 def isValid(letter, number, color): 
     if(color == "white"):
@@ -128,8 +135,6 @@ def isValid(letter, number, color):
 def isCapture(letter, number, color):
     if(color == "white"):
         for x in range(len(BLACK_PIECES)):
-            print(x)
-            print(len(BLACK_PIECES))
             if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                 BLACK_PIECES.pop(x)
                 return  # Bug where after popping off list would continue through
@@ -183,16 +188,19 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 movingPiece = clickOnPiece(pos, WhiteTurn) # some time click on piece
-                if(len(clicked_piece) > 0): # There is a piece selected, trying to move it
-                    moveTo = whereClick(pos)
-                    if(isValid(moveTo[0], moveTo[1], movingPiece.color)): # Not moving on top of teammate
-                        print("Move Valid moving "+ movingPiece.__str__() + " to "+moveTo.__str__())
-                        isCapture(moveTo[0], moveTo[1], movingPiece.color) # Remove any piece from other team
-                        movingPiece.letter = moveTo[0]
-                        movingPiece.number = moveTo[1]
-                        clicked_piece.clear()
-                        piece = None 
-                        WhiteTurn = False if WhiteTurn else True               
+                if(len(clicked_piece) > 0 and movingPiece != None): # There is a piece selected, trying to move it
+                    if(WhiteTurn and movingPiece.color == "white" or not WhiteTurn and movingPiece.color == "black"): # If it is white's turn needs to be white piece moving
+                        moveTo = whereClick(pos)
+                        moves = movingPiece.returnLegalMoves()
+                        allow = squareInLegalMoves(moveTo, moves)
+                        if(isValid(moveTo[0], moveTo[1], movingPiece.color) and allow): # Not moving on top of teammate
+                            print("Move Valid moving "+ movingPiece.__str__() + " to "+moveTo.__str__())
+                            isCapture(moveTo[0], moveTo[1], movingPiece.color) # Remove any piece from other team
+                            movingPiece.letter = moveTo[0]
+                            movingPiece.number = moveTo[1]
+                            clicked_piece.clear()
+                            piece = None 
+                            WhiteTurn = False if WhiteTurn else True               
 
         clock.tick(30)
         drawWindow()
