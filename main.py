@@ -18,6 +18,35 @@ clicked_piece = [] # selected piece list will never be greater than 1
 piece = None
 WhiteTurn = True
 
+#   SPRITES     #
+wKing = pygame.image.load("Images/WhiteKing.png")
+wQueen = pygame.image.load("Images/WhiteQueen.png")
+wBishop = pygame.image.load("Images/WhiteBishop.png")
+wKnight = pygame.image.load("Images/WhiteKnight.png")
+wRook = pygame.image.load("Images/WhiteRook.png")
+wPawn = pygame.image.load("Images/WhitePawn.png")
+bKing = pygame.image.load("Images/BlackKing.png")
+bQueen = pygame.image.load("Images/BlackQueen.png")
+bBishop = pygame.image.load("Images/BlackBishop.png")
+bKnight = pygame.image.load("Images/BlackKnight.png")
+bRook = pygame.image.load("Images/BlackRook.png")
+bPawn = pygame.image.load("Images/BlackPawn.png")
+# ALL SPRITES #
+# SCALING
+wKing = pygame.transform.scale(wKing, (75, 75))
+wQueen = pygame.transform.scale(wQueen, (75, 75))
+wBishop = pygame.transform.scale(wBishop, (75, 75))
+wKnight = pygame.transform.scale(wKnight, (75, 75))
+wRook = pygame.transform.scale(wRook, (75, 75))
+wPawn = pygame.transform.scale(wPawn, (75, 75))
+bKing = pygame.transform.scale(bKing, (75, 75))
+bQueen = pygame.transform.scale(bQueen, (75, 75))
+bBishop = pygame.transform.scale(bBishop, (75, 75))
+bKnight = pygame.transform.scale(bKnight, (75, 75))
+bRook = pygame.transform.scale(bRook, (75, 75))
+bPawn = pygame.transform.scale(bPawn, (75, 75))
+
+
 def InitializeGameOfChess():
     WHITE_PIECES.clear()
     BLACK_PIECES.clear()
@@ -72,6 +101,18 @@ def drawWhite():
         x = (something.letter * 100) - 50
         y = 850 - (something.number * 100)# 1 is first index
         rectangle = pygame.Rect(x, y, 20, 20)
+        if(something.__class__.__name__ == "Pawn"):
+            WIN.blit(wPawn, rectangle)
+        elif(something.__class__.__name__ == "King"):
+            WIN.blit(wKing, rectangle)
+        elif(something.__class__.__name__ == "Queen"):
+            WIN.blit(wQueen, rectangle)
+        elif(something.__class__.__name__ == "Bishop"):
+            WIN.blit(wBishop, rectangle)
+        elif(something.__class__.__name__ == "Knight"):
+            WIN.blit(wKnight, rectangle) 
+        elif(something.__class__.__name__ == "Rook"):
+            WIN.blit(wRook, rectangle)   
         All_PIECES.append(rectangle)
         pygame.draw.rect(WIN, colorWhite, rectangle)
 
@@ -80,8 +121,20 @@ def drawBlack():
         x = (something.letter * 100) - 50
         y = 850 - (something.number * 100) # 1 x 100 because 1 indexed
         rectangle = pygame.Rect(x, y, 20, 20)
+        if(something.__class__.__name__ == "Pawn"):
+            WIN.blit(bPawn, rectangle)
+        elif(something.__class__.__name__ == "King"):
+            WIN.blit(bKing, rectangle)
+        elif(something.__class__.__name__ == "Queen"):
+            WIN.blit(bQueen, rectangle)
+        elif(something.__class__.__name__ == "Bishop"):
+            WIN.blit(bBishop, rectangle)
+        elif(something.__class__.__name__ == "Knight"):
+            WIN.blit(bKnight, rectangle) 
+        elif(something.__class__.__name__ == "Rook"):
+            WIN.blit(bRook, rectangle) 
         All_PIECES.append(rectangle)
-        pygame.draw.rect(WIN, colorBlack, rectangle)
+        pygame.draw.rect(WIN, (255,0,255, 128), rectangle)
 
 def drawSelectedPiece():
     if(len(clicked_piece) > 0):
