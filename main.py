@@ -1,4 +1,5 @@
 import pygame
+from pygame.draw import rect
 from pieces import *
 
 pygame.init()
@@ -95,46 +96,55 @@ def drawChessBoard():
         WIN.blit(rownumber,(5,(750-100*x)))
         columnletter = myfont.render(chr(97+x).capitalize(), False, (0, 0, 0))
         WIN.blit(columnletter,((100*x +70),0))
+    global piece # Check if a piece is selected, highlight square underneath
+    if(piece != None):
+        selectedX = (piece.letter * 100) - 100 # 1 Indexed
+        selectedY = 800 - (piece.number * 100)
+        pygame.draw.rect(WIN, colorRed, pygame.Rect(selectedX, selectedY, 100, 100))
+        # valid moves too
+
 
 def drawWhite():
     for  something in WHITE_PIECES:
-        x = (something.letter * 100) - 50
-        y = 850 - (something.number * 100)# 1 is first index
-        rectangle = pygame.Rect(x, y, 20, 20)
+        x = (something.letter * 100) - 100
+        y = 800 - (something.number * 100)# 1 is first index
+        rectangle = pygame.Surface((100, 100), pygame.SRCALPHA)
+        #rectangle.fill((255, 255, 255, 0))
         if(something.__class__.__name__ == "Pawn"):
-            WIN.blit(wPawn, rectangle)
+            rectangle.blit(wPawn, (10,10))
         elif(something.__class__.__name__ == "King"):
-            WIN.blit(wKing, rectangle)
+           rectangle.blit(wKing, (10,10))
         elif(something.__class__.__name__ == "Queen"):
-            WIN.blit(wQueen, rectangle)
+            rectangle.blit(wQueen, (10,10))
         elif(something.__class__.__name__ == "Bishop"):
-            WIN.blit(wBishop, rectangle)
+            rectangle.blit(wBishop, (10,10))
         elif(something.__class__.__name__ == "Knight"):
-            WIN.blit(wKnight, rectangle) 
+            rectangle.blit(wKnight, (10,10))
         elif(something.__class__.__name__ == "Rook"):
-            WIN.blit(wRook, rectangle)   
-        All_PIECES.append(rectangle)
-        pygame.draw.rect(WIN, colorWhite, rectangle)
+            rectangle.blit(wRook, (10,10))  
+        #All_PIECES.append(rectangle)
+        WIN.blit(rectangle, (x, y))
 
 def drawBlack():
     for  something in BLACK_PIECES:
-        x = (something.letter * 100) - 50
-        y = 850 - (something.number * 100) # 1 x 100 because 1 indexed
-        rectangle = pygame.Rect(x, y, 20, 20)
+        x = (something.letter * 100) - 100
+        y = 800 - (something.number * 100)# 1 is first index
+        rectangle = pygame.Surface((100, 100), pygame.SRCALPHA)
+        #rectangle.fill((255, 255, 255, 0))
         if(something.__class__.__name__ == "Pawn"):
-            WIN.blit(bPawn, rectangle)
+            rectangle.blit(bPawn, (10,10))
         elif(something.__class__.__name__ == "King"):
-            WIN.blit(bKing, rectangle)
+           rectangle.blit(bKing, (10,10))
         elif(something.__class__.__name__ == "Queen"):
-            WIN.blit(bQueen, rectangle)
+            rectangle.blit(bQueen, (10,10))
         elif(something.__class__.__name__ == "Bishop"):
-            WIN.blit(bBishop, rectangle)
+            rectangle.blit(bBishop, (10,10))
         elif(something.__class__.__name__ == "Knight"):
-            WIN.blit(bKnight, rectangle) 
+            rectangle.blit(bKnight, (10,10))
         elif(something.__class__.__name__ == "Rook"):
-            WIN.blit(bRook, rectangle) 
-        All_PIECES.append(rectangle)
-        pygame.draw.rect(WIN, (255,0,255, 128), rectangle)
+            rectangle.blit(bRook, (10,10))  
+        #All_PIECES.append(rectangle)
+        WIN.blit(rectangle, (x, y))
 
 def drawSelectedPiece():
     if(len(clicked_piece) > 0):
@@ -173,8 +183,8 @@ def squareInLegalMoves(attemptedMove, allowedMoves):
     return False
 
 # Make sure there is no piece on the same square that is the same color
-def isValid(letter, number, color): 
-    if(color == "white"):
+def isValid(letter, number, movpiece): 
+    if(movpiece.color == "white"):
         for x in range(len(WHITE_PIECES)):
             if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
                 return False
@@ -182,6 +192,50 @@ def isValid(letter, number, color):
         for x in range(len(BLACK_PIECES)):
             if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                 return False
+    if(movpiece.__class__.__name__ == "Pawn"): # Check if diag mov is valid and if is first move for that pawn
+        # DIAGONAL MOVE CHECK
+        if(movpiece.color == "white" and movpiece.letter != letter): # white pawn moving diagonally
+            for x in range(len(BLACK_PIECES)):
+                if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
+                    return True
+            return False # Not a capture, hence not valid
+        elif(movpiece.color == "black" and movpiece.letter != letter):
+            for x in range(len(WHITE_PIECES)):
+                if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
+                    return True
+            return False # Not a capture, hence not valid
+
+        # FWD MOVE CHECK
+        if(movpiece.color == "white" and (movpiece.number+1) != number and movpiece.number != 2): # white piece trying to move two squares after first move is invalid
+            return False
+        elif(movpiece.color == "black" and (movpiece.number-1) != number and movpiece.number != 7): # black piece trying to move two squares after first move is invalid
+            return False
+
+        # FWD MOVE CAPTURE CHECK
+        if(movpiece.color == "white" and movpiece.letter == letter): # white pawn moving forward cannot capture
+            for x in range(len(BLACK_PIECES)):
+                if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
+                    return False
+        elif(movpiece.color == "black" and movpiece.letter == letter): # black pawn moving forward cannot capture
+            for x in range(len(WHITE_PIECES)):
+                if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
+                    return False
+            
+        #FINALLY, AS AN EDGE CASE, A KNIGHT OBSTRUCTING A, C, F, H Pawns means that they cannot move two squares forward, moving throught the knight
+        if(movpiece.color == "white" and (movpiece.number+1) != number):
+            for x in range(len(BLACK_PIECES)): # Invalid whether it is your piece or opponents
+                if(BLACK_PIECES[x].number == (movpiece.number+1) and BLACK_PIECES[x].letter == movpiece.letter): # There is a piece blocking move
+                    return False
+            for x in range(len(WHITE_PIECES)):
+                if(WHITE_PIECES[x].number == (movpiece.number+1) and WHITE_PIECES[x].letter == movpiece.letter): # There is a piece blocking move
+                    return False
+        elif(movpiece.color == "black" and (movpiece.number-1) != number):
+            for x in range(len(BLACK_PIECES)): # Invalid whether it is your piece or opponents
+                if(BLACK_PIECES[x].number == (movpiece.number-1) and BLACK_PIECES[x].letter == movpiece.letter): # There is a piece blocking move
+                    return False
+            for x in range(len(WHITE_PIECES)):
+                if(WHITE_PIECES[x].number == (movpiece.number-1) and WHITE_PIECES[x].letter == movpiece.letter): # There is a piece blocking move
+                    return False
     return True
 
 # Remove pieces from other color if on square
@@ -190,12 +244,13 @@ def isCapture(letter, number, color):
         for x in range(len(BLACK_PIECES)):
             if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                 BLACK_PIECES.pop(x)
-                return  # Bug where after popping off list would continue through
+                return True # Bug where after popping off list would continue through
     else:
         for x in range(len(WHITE_PIECES)):
             if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
                 WHITE_PIECES.pop(x)
-                return
+                return True
+    return False
 
 #pos is position of the mouse during an mousedown event
 # whoTurn is a boolean that is true during whites turn and false during blacks turn
@@ -207,16 +262,16 @@ def clickOnPiece(pos, whoTurn):
         piece = pieceTmp
     #then is there a piece on that square
     # Move pos so that it hits bounding box of that square
-    changeX =  (square[0] * 100) - 49# Modify my dumb grid so it fits pixel measurements
-    changeY = 851 - (square[1] * 100)
-    posChanged = (changeX, changeY)
+    #changeX =  (square[0] * 100) - 49# Modify my dumb grid so it fits pixel measurements
+    #changeY = 851 - (square[1] * 100)
+    #posChanged = (changeX, changeY)
 
     # Same code for determining which rect it falls into
-    global clicked_piece
-    for s in All_PIECES:
-        if s.collidepoint(posChanged):
-            clicked_piece.clear()
-            clicked_piece.append(s)
+    #global clicked_piece
+    #for s in All_PIECES:
+    #    if s.collidepoint(posChanged):
+    #        clicked_piece.clear()
+    #        clicked_piece.append(s)
     #clicked_piece = [s for s in All_PIECES if s.collidepoint(pos)]  List Comprehensions still make no sense
     # Finally, return the piece that was clicked on
     return piece
@@ -232,6 +287,7 @@ def whereClick(pos):
 def main():
     Running = True
     global WhiteTurn
+    global piece
     clock = pygame.time.Clock()
     InitializeGameOfChess()
     while Running:
@@ -241,17 +297,17 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 movingPiece = clickOnPiece(pos, WhiteTurn) # some time click on piece
-                if(len(clicked_piece) > 0 and movingPiece != None): # There is a piece selected, trying to move it
+                if(movingPiece != None): # There is a piece selected, trying to move it  len(clicked_piece) > 0 and 
                     if(WhiteTurn and movingPiece.color == "white" or not WhiteTurn and movingPiece.color == "black"): # If it is white's turn needs to be white piece moving
                         moveTo = whereClick(pos)
                         moves = movingPiece.returnLegalMoves()
                         allow = squareInLegalMoves(moveTo, moves)
-                        if(isValid(moveTo[0], moveTo[1], movingPiece.color) and allow): # Not moving on top of teammate
+                        if(isValid(moveTo[0], moveTo[1], movingPiece) and allow): # Not moving on top of teammate
                             print("Move Valid moving "+ movingPiece.__str__() + " to "+moveTo.__str__())
                             isCapture(moveTo[0], moveTo[1], movingPiece.color) # Remove any piece from other team
                             movingPiece.letter = moveTo[0]
                             movingPiece.number = moveTo[1]
-                            clicked_piece.clear()
+                            #clicked_piece.clear()
                             piece = None 
                             WhiteTurn = False if WhiteTurn else True               
 
