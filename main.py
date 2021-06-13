@@ -1,6 +1,7 @@
 import pygame
 from pygame.draw import rect
 from pieces import *
+import LegalMove
 
 pygame.init()
 pygame.font.init()
@@ -193,50 +194,17 @@ def isValid(letter, number, movpiece):
             if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                 return False
     if(movpiece.__class__.__name__ == "Pawn"): # Check if diag mov is valid and if is first move for that pawn
-        # DIAGONAL MOVE CHECK
-        if(movpiece.color == "white" and movpiece.letter != letter): # white pawn moving diagonally
-            for x in range(len(BLACK_PIECES)):
-                if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
-                    return True
-            return False # Not a capture, hence not valid
-        elif(movpiece.color == "black" and movpiece.letter != letter):
-            for x in range(len(WHITE_PIECES)):
-                if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
-                    return True
-            return False # Not a capture, hence not valid
-
-        # FWD MOVE CHECK
-        if(movpiece.color == "white" and (movpiece.number+1) != number and movpiece.number != 2): # white piece trying to move two squares after first move is invalid
-            return False
-        elif(movpiece.color == "black" and (movpiece.number-1) != number and movpiece.number != 7): # black piece trying to move two squares after first move is invalid
-            return False
-
-        # FWD MOVE CAPTURE CHECK
-        if(movpiece.color == "white" and movpiece.letter == letter): # white pawn moving forward cannot capture
-            for x in range(len(BLACK_PIECES)):
-                if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
-                    return False
-        elif(movpiece.color == "black" and movpiece.letter == letter): # black pawn moving forward cannot capture
-            for x in range(len(WHITE_PIECES)):
-                if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
-                    return False
-            
-        #FINALLY, AS AN EDGE CASE, A KNIGHT OBSTRUCTING A, C, F, H Pawns means that they cannot move two squares forward, moving throught the knight
-        if(movpiece.color == "white" and (movpiece.number+1) != number):
-            for x in range(len(BLACK_PIECES)): # Invalid whether it is your piece or opponents
-                if(BLACK_PIECES[x].number == (movpiece.number+1) and BLACK_PIECES[x].letter == movpiece.letter): # There is a piece blocking move
-                    return False
-            for x in range(len(WHITE_PIECES)):
-                if(WHITE_PIECES[x].number == (movpiece.number+1) and WHITE_PIECES[x].letter == movpiece.letter): # There is a piece blocking move
-                    return False
-        elif(movpiece.color == "black" and (movpiece.number-1) != number):
-            for x in range(len(BLACK_PIECES)): # Invalid whether it is your piece or opponents
-                if(BLACK_PIECES[x].number == (movpiece.number-1) and BLACK_PIECES[x].letter == movpiece.letter): # There is a piece blocking move
-                    return False
-            for x in range(len(WHITE_PIECES)):
-                if(WHITE_PIECES[x].number == (movpiece.number-1) and WHITE_PIECES[x].letter == movpiece.letter): # There is a piece blocking move
-                    return False
-    return True
+        return LegalMove.LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Queen"):
+        print(LegalMove.LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES))
+        return LegalMove.LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Rook"):
+        return LegalMove.LegalforRook(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Bishop"):
+        return LegalMove.LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Knight"):
+        return LegalMove.LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    return True # King legal moves like not moving into check require checks to be defined
 
 # Remove pieces from other color if on square
 def isCapture(letter, number, color):
