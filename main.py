@@ -13,6 +13,7 @@ clock = pygame.time
 colorWhite = (255, 255, 255)
 colorBlack = (0, 0, 0)
 colorRed = (255, 0, 0)
+colorSalmon = (255, 160, 122)
 WHITE_PIECES = []
 BLACK_PIECES = []
 All_PIECES = [] # List of rects for collidepoint()
@@ -72,6 +73,28 @@ def InitializeGameOfChess():
             BLACK_PIECES.append(King("black", x, 8))
     for x in range(16):
         print(BLACK_PIECES[x])
+
+# Make sure there is no piece on the same square that is the same color
+def isValid(letter, number, movpiece): 
+    if(movpiece.color == "white"):
+        for x in range(len(WHITE_PIECES)):
+            if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
+                return False
+    else:
+        for x in range(len(BLACK_PIECES)):
+            if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
+                return False
+    if(movpiece.__class__.__name__ == "Pawn"): # Check if diag mov is valid and if is first move for that pawn
+        return LegalMove.LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Queen"):
+        return LegalMove.LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Rook"):
+        return LegalMove.LegalforRook(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Bishop"):
+        return LegalMove.LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Knight"):
+        return LegalMove.LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    return True # King legal moves like not moving into check require checks to be defined
     
 def drawChessBoard():
     colorGreen = (20, 197, 20)
@@ -103,6 +126,13 @@ def drawChessBoard():
         selectedY = 800 - (piece.number * 100)
         pygame.draw.rect(WIN, colorRed, pygame.Rect(selectedX, selectedY, 100, 100))
         # valid moves too
+        ValidMoveSet = piece.returnLegalMoves()
+        for x in range(len(ValidMoveSet)):
+            if(isValid(ValidMoveSet[x][0], ValidMoveSet[x][1], piece)):
+                validmovX = (ValidMoveSet[x][0] * 100) - 100
+                validmovY = 800 - (ValidMoveSet[x][1] * 100)
+                pygame.draw.rect(WIN, colorSalmon, pygame.Rect(validmovX, validmovY, 100, 100))
+            
 
 
 def drawWhite():
@@ -182,29 +212,6 @@ def squareInLegalMoves(attemptedMove, allowedMoves):
         if(attemptedMove == allowedMoves[x]):
             return True
     return False
-
-# Make sure there is no piece on the same square that is the same color
-def isValid(letter, number, movpiece): 
-    if(movpiece.color == "white"):
-        for x in range(len(WHITE_PIECES)):
-            if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
-                return False
-    else:
-        for x in range(len(BLACK_PIECES)):
-            if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
-                return False
-    if(movpiece.__class__.__name__ == "Pawn"): # Check if diag mov is valid and if is first move for that pawn
-        return LegalMove.LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    elif(movpiece.__class__.__name__ == "Queen"):
-        print(LegalMove.LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES))
-        return LegalMove.LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    elif(movpiece.__class__.__name__ == "Rook"):
-        return LegalMove.LegalforRook(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    elif(movpiece.__class__.__name__ == "Bishop"):
-        return LegalMove.LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    elif(movpiece.__class__.__name__ == "Knight"):
-        return LegalMove.LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    return True # King legal moves like not moving into check require checks to be defined
 
 # Remove pieces from other color if on square
 def isCapture(letter, number, color):

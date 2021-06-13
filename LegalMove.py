@@ -47,8 +47,6 @@ def LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
 def LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     numberMovesX = abs(letter - movpiece.letter)
     numberMovesY = abs(number - movpiece.number)
-    print(str(numberMovesX))
-    print(str(numberMovesY))
     if(numberMovesX == 0): # Staying in same column, check if theres a piece between queen and desired square
         if(number > movpiece.number): # Moving up the grid, add
             for x in range(1, numberMovesY):
