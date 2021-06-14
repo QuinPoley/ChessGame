@@ -232,6 +232,6 @@ def LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     return True # Can jump over stuff, so this is pretty much always true
 
 def LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
-    if((letter > 1 or letter < 8) and (number > 1 or number < 8)):
+    if((letter < 1 or letter > 8) and (number < 1 or number > 8)):
         return False
     return True

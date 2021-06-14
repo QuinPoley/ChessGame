@@ -117,6 +117,7 @@ def isCheck(color, letter=-1, number=-1):
         King = getPosKing(color)
         letter = King.letter
         number = King.number
+    print(letter, number)
     global whiteInCheck, blackInCheck
     if(color == "white"): # is white in check?
         for x in range(len(BLACK_PIECES)):
@@ -142,11 +143,13 @@ def isCheck(color, letter=-1, number=-1):
 
 
 def isCheckMate(color):
+    if(not isCheck(color)):
+        return False
     King = getPosKing(color)
     moves = King.returnLegalMoves()
     for x in range(len(moves)):
-        if(not isCheck(color)):
-            return False
+        print(moves[x][0], moves[x][1])
+        print(isValid(moves[x][0], moves[x][1], King))
         if(isValid(moves[x][0], moves[x][1], King)):
             if(not isCheck(color, moves[x][0], moves[x][1])):
                 return False
@@ -291,7 +294,7 @@ def clickOnPiece(pos, whoTurn):
     global blackInCheck
     #if(whiteInCheck):
     #    piece = getPosKing("white")
-    #    return piece # If in check cannot select another piece
+    #    return piece # If in check cannot select another piece UNLESS it can capture or block check
     #elif(blackInCheck):
     #    piece = getPosKing("black")
     #    return piece # If in check cannot select another piece
