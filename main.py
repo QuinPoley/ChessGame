@@ -1,5 +1,6 @@
 import pygame
 from pygame.draw import rect
+from pygame.scrap import contains
 from pieces import *
 import LegalMove
 
@@ -20,6 +21,8 @@ All_PIECES = [] # List of rects for collidepoint()
 clicked_piece = [] # selected piece list will never be greater than 1
 piece = None
 WhiteTurn = True
+whiteInCheck = False
+blackInCheck = False
 
 #   SPRITES     #
 wKing = pygame.image.load("Images/WhiteKing.png")
@@ -95,6 +98,55 @@ def isValid(letter, number, movpiece):
     elif(movpiece.__class__.__name__ == "Knight"):
         return LegalMove.LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
     return True # King legal moves like not moving into check require checks to be defined
+
+def getPosKing(color):
+    if(color == "white"):
+        for x in range(len(WHITE_PIECES)):
+            if(WHITE_PIECES[x].__class__.__name__ == "King"):
+                return WHITE_PIECES[x]
+    else:
+        for x in range(len(BLACK_PIECES)):
+            if(BLACK_PIECES[x].__class__.__name__ == "King"):
+                return BLACK_PIECES[x]
+
+def isCheck(color, letter=-1, number=-1):
+    if(letter == -1):
+        King = getPosKing(color)
+        letter = King.letter
+        number = King.number
+    print(letter, number)
+    global whiteInCheck, blackInCheck
+    if(color == "white"): # is white in check?
+        for x in range(len(BLACK_PIECES)):
+            moves = BLACK_PIECES[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isValid(moves[i][0], moves[i][1], BLACK_PIECES[x])):
+                    validmoves.append((moves[i][0], moves[i][1]))
+            if((letter, number) in validmoves):
+                whiteInCheck = True
+                return True       
+    else: # is black in check?
+        for x in range(len(WHITE_PIECES)):
+            moves = WHITE_PIECES[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isValid(moves[i][0], moves[i][1], WHITE_PIECES[x])):
+                    validmoves.append((moves[i][0], moves[i][1]))
+            if((letter, number) in validmoves):
+                blackInCheck = True
+                return True
+    return False
+
+
+def isCheckMate(color):
+    King = getPosKing(color)
+    moves = King.returnLegalMoves()
+    for x in range(len(moves)):
+        print(isCheck(color, moves[x][0], moves[x][1]))
+        if(not isCheck(color, moves[x][0], moves[x][1])):
+            return False
+    return True
     
 def drawChessBoard():
     colorGreen = (20, 197, 20)
@@ -231,6 +283,14 @@ def isCapture(letter, number, color):
 # whoTurn is a boolean that is true during whites turn and false during blacks turn
 def clickOnPiece(pos, whoTurn):
     global piece
+    global whiteInCheck
+    global blackInCheck
+    #if(whiteInCheck):
+    #    piece = getPosKing("white")
+    #    return piece # If in check cannot select another piece
+    #elif(blackInCheck):
+    #    piece = getPosKing("black")
+    #    return piece # If in check cannot select another piece
     square = whereClick(pos)
     pieceTmp = pieceAt(square, whoTurn)
     if(pieceTmp != None):
@@ -272,6 +332,7 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 movingPiece = clickOnPiece(pos, WhiteTurn) # some time click on piece
+                #print(str(movingPiece))
                 if(movingPiece != None): # There is a piece selected, trying to move it  len(clicked_piece) > 0 and 
                     if(WhiteTurn and movingPiece.color == "white" or not WhiteTurn and movingPiece.color == "black"): # If it is white's turn needs to be white piece moving
                         moveTo = whereClick(pos)
@@ -283,6 +344,12 @@ def main():
                             movingPiece.letter = moveTo[0]
                             movingPiece.number = moveTo[1]
                             #clicked_piece.clear()
+                            color = "black" if WhiteTurn else "white"
+                            if(isCheckMate(color)):
+                                print("Checkmate")
+                                pygame.quit()
+                            elif(isCheck(color)):
+                                print("Check")
                             piece = None 
                             WhiteTurn = False if WhiteTurn else True               
 
