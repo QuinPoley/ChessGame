@@ -1,5 +1,7 @@
 def LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     # DIAGONAL MOVE CHECK
+    if((letter < 1 or letter > 8) and (number < 1 or number > 8)):
+        return False
     if(movpiece.color == "white" and movpiece.letter != letter): # white pawn moving diagonally
             for x in range(len(BLACK_PIECES)):
                 if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
@@ -47,6 +49,8 @@ def LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
 def LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     numberMovesX = abs(letter - movpiece.letter)
     numberMovesY = abs(number - movpiece.number)
+    if((letter < 1 or letter > 8) and (number < 1 or number > 8)):
+        return False
     if(numberMovesX == 0): # Staying in same column, check if theres a piece between queen and desired square
         if(number > movpiece.number): # Moving up the grid, add
             for x in range(1, numberMovesY):
@@ -132,6 +136,8 @@ def LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
 def LegalforRook(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     numberMovesX = abs(letter - movpiece.letter)
     numberMovesY = abs(number - movpiece.number)
+    if((letter < 1 or letter > 8) and (number < 1 or number > 8)):
+        return False
     if(numberMovesX == 0): # Staying in same column, check if theres a piece between queen and desired square
         if(number > movpiece.number): # Moving up the grid, add
             for x in range(1, numberMovesY):
@@ -179,6 +185,8 @@ def LegalforRook(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
 def LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     numberMovesX = abs(letter - movpiece.letter)
     numberMovesY = abs(number - movpiece.number)
+    if((letter < 1 or letter > 8) and (number < 1 or number > 8)):
+        return False
     if(numberMovesX != numberMovesX):
         return False
     if(number > movpiece.number): # Moving up the grid, add
@@ -219,4 +227,11 @@ def LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     return True
 
 def LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
+    if((letter < 1 or letter > 8) and (number < 1 or number > 8)):
+        return False
     return True # Can jump over stuff, so this is pretty much always true
+
+def LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
+    if((letter > 1 or letter < 8) and (number > 1 or number < 8)):
+        return False
+    return True

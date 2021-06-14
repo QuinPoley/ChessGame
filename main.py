@@ -1,4 +1,5 @@
 import pygame
+import sys
 from pygame.draw import rect
 from pygame.scrap import contains
 from pieces import *
@@ -97,6 +98,8 @@ def isValid(letter, number, movpiece):
         return LegalMove.LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
     elif(movpiece.__class__.__name__ == "Knight"):
         return LegalMove.LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "King"):
+        return LegalMove.LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
     return True # King legal moves like not moving into check require checks to be defined
 
 def getPosKing(color):
@@ -114,7 +117,6 @@ def isCheck(color, letter=-1, number=-1):
         King = getPosKing(color)
         letter = King.letter
         number = King.number
-    print(letter, number)
     global whiteInCheck, blackInCheck
     if(color == "white"): # is white in check?
         for x in range(len(BLACK_PIECES)):
@@ -143,9 +145,11 @@ def isCheckMate(color):
     King = getPosKing(color)
     moves = King.returnLegalMoves()
     for x in range(len(moves)):
-        print(isCheck(color, moves[x][0], moves[x][1]))
-        if(not isCheck(color, moves[x][0], moves[x][1])):
+        if(not isCheck(color)):
             return False
+        if(isValid(moves[x][0], moves[x][1], King)):
+            if(not isCheck(color, moves[x][0], moves[x][1])):
+                return False
     return True
     
 def drawChessBoard():
@@ -348,6 +352,7 @@ def main():
                             if(isCheckMate(color)):
                                 print("Checkmate")
                                 pygame.quit()
+                                sys.exit()
                             elif(isCheck(color)):
                                 print("Check")
                             piece = None 
