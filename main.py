@@ -343,7 +343,7 @@ def drawBottomBar():
             surf.blit(swKnight, (0,0))
         elif(CAPTURED_WHITE_PIECES[x].__class__.__name__ == "Rook"):
             surf.blit(swRook, (0,0)) 
-        WIN.blit(surf, ((680 - (20*x)), 815))
+        WIN.blit(surf, ((100 + (20*x)), 815))
         
         
     for x in range(len(CAPTURED_BLACK_PIECES)):
@@ -360,7 +360,7 @@ def drawBottomBar():
             surf.blit(swKnight, (0,0))
         elif(CAPTURED_BLACK_PIECES[x].__class__.__name__ == "Rook"):
             surf.blit(swRook, (0,0)) 
-        WIN.blit(surf, ((100 + (20*x)), 815))
+        WIN.blit(surf, ((680 - (20*x)), 815))
 
 def drawWindow():
     WIN.fill((76, 76, 76))
