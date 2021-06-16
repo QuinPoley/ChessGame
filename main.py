@@ -121,6 +121,21 @@ def isValid(letter, number, movpiece):
         return LegalMove.LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
     return True # King legal moves like not moving into check require checks to be defined
 
+def isValidforCheckmate(letter, number, movpiece): 
+    if(movpiece.__class__.__name__ == "Pawn"): # Check if diag mov is valid and if is first move for that pawn
+        return LegalMove.LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Queen"):
+        return LegalMove.LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Rook"):
+        return LegalMove.LegalforRook(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Bishop"):
+        return LegalMove.LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Knight"):
+        return LegalMove.LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "King"):
+        return LegalMove.LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    return True # King legal moves like not moving into check require checks to be defined
+
 def getPosKing(color):
     if(color == "white"):
         for x in range(len(WHITE_PIECES)):
@@ -143,7 +158,7 @@ def isCheck(color, letter=-1, number=-1):
             moves = BLACK_PIECES[x].returnLegalMoves()
             validmoves = []
             for i in range(len(moves)):
-                if(isValid(moves[i][0], moves[i][1], BLACK_PIECES[x])):
+                if(isValidforCheckmate(moves[i][0], moves[i][1], BLACK_PIECES[x])):
                     validmoves.append((moves[i][0], moves[i][1]))
             if((letter, number) in validmoves):
                 whiteInCheck = True
@@ -153,7 +168,7 @@ def isCheck(color, letter=-1, number=-1):
             moves = WHITE_PIECES[x].returnLegalMoves()
             validmoves = []
             for i in range(len(moves)):
-                if(isValid(moves[i][0], moves[i][1], WHITE_PIECES[x])):
+                if(isValidforCheckmate(moves[i][0], moves[i][1], WHITE_PIECES[x])):
                     validmoves.append((moves[i][0], moves[i][1]))
             if((letter, number) in validmoves):
                 blackInCheck = True
@@ -183,7 +198,8 @@ def getPieceAttackingKing(color):
                 listOfPieces.append(WHITE_PIECES[x])
     return listOfPieces
 
-
+# BUG - If a piece is putting the king in check 1 square away, and is defended by another piece, checkmate is returned as false because technically that move is not valid for the defending piece as its teammate is on the square
+# so, king sees it as a valid move
 def isCheckMate(color):
     if(not isCheck(color)):
         return False
@@ -200,12 +216,12 @@ def isCheckMate(color):
         if(color == "white"):
             cancapture = isCheck("black", attackers[0].letter, attackers[0].number) # is check with args passed in is actually can a piece capture at that square
             if(cancapture):
-                # MAY STILL BE TRUE, IF MOVING CAPTURING PIECE CAUSES CHECK
+                # MAY STILL BE TRUE, IF MOVING CAPTURING PIECE CAUSES CHECK OR IF PIECE IS DEFENDED
                 return False
         else:
-            cancapture = isCheck("black", attackers[0].letter, attackers[0].number) # is check with args passed in is actually can a piece capture at that square
+            cancapture = isCheck("white", attackers[0].letter, attackers[0].number) # is check with args passed in is actually can a piece capture at that square
             if(cancapture):
-                # MAY STILL BE TRUE, IF MOVING CAPTURING PIECE CAUSES CHECK
+                # MAY STILL BE TRUE, IF MOVING CAPTURING PIECE CAUSES CHECK OR IF PIECE IS DEFENDED AND CAPTURE IS WITH KING
                 return False
         
         # Now check if can be blocked?
@@ -440,16 +456,18 @@ def main():
                             notCheck = not (isCheck(altcolor, moveTo[0], moveTo[1])) # King cannot move into check --- TODO check if other pieces moving cause check too
                         if(isValid(moveTo[0], moveTo[1], movingPiece) and allow and notCheck): # Not moving on top of teammate and cannot move into check
                             wasJust = movingPiece.letter, movingPiece.number
+                            blackPiece = isCapture(moveTo[0], moveTo[1], movingPiece.color)
                             attacker = getPieceAttackingKing(altcolor)
                             movingPiece.letter = moveTo[0]
                             movingPiece.number = moveTo[1]
-                            if(isCheck(altcolor)):   
+                            if(isCheck(altcolor)):
                                 if(not (len(attacker) == 1 and attacker[0].letter == moveTo[0] and attacker[0].number == moveTo[1])):
                                     movingPiece.letter, movingPiece.number = wasJust
+                                    BLACK_PIECES.append(blackPiece) # Tried to capture but not a valid move
                                     break
                             #clicked_piece.clear()
                             print("Move Valid moving "+ movingPiece.__str__() + " to "+moveTo.__str__())
-                            isCapture(moveTo[0], moveTo[1], movingPiece.color)  # Remove any piece from other team
+                              # Remove any piece from other team
                             #print(getPieceAttackingKing("white"))
                             #print(getPieceAttackingKing("black"))
                             if(isCheckMate(color)):
