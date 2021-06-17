@@ -395,15 +395,15 @@ def drawBottomBar():
         if(CAPTURED_BLACK_PIECES[x].__class__.__name__ == "Pawn"):
             surf.blit(sbPawn, (0,0))
         elif(CAPTURED_BLACK_PIECES[x].__class__.__name__ == "King"):
-           surf.blit(swKing, (0,0))
+           surf.blit(sbKing, (0,0))
         elif(CAPTURED_BLACK_PIECES[x].__class__.__name__ == "Queen"):
-            surf.blit(swQueen, (0,0))
+            surf.blit(sbQueen, (0,0))
         elif(CAPTURED_BLACK_PIECES[x].__class__.__name__ == "Bishop"):
-            surf.blit(swBishop, (0,0))
+            surf.blit(sbBishop, (0,0))
         elif(CAPTURED_BLACK_PIECES[x].__class__.__name__ == "Knight"):
-            surf.blit(swKnight, (0,0))
+            surf.blit(sbKnight, (0,0))
         elif(CAPTURED_BLACK_PIECES[x].__class__.__name__ == "Rook"):
-            surf.blit(swRook, (0,0)) 
+            surf.blit(sbRook, (0,0)) 
         WIN.blit(surf, ((680 - (20*x)), 815))
 
 def drawWindow():
@@ -438,15 +438,13 @@ def isCapture(letter, number, color):
         for x in range(len(BLACK_PIECES)):
             if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                 CAPTURED_BLACK_PIECES.append(BLACK_PIECES[x])
-                BLACK_PIECES.pop(x)
-                return True # Bug where after popping off list would continue through
+                return BLACK_PIECES.pop(x) # Bug where after popping off list would continue through
     else:
         for x in range(len(WHITE_PIECES)):
             if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
                 CAPTURED_WHITE_PIECES.append(WHITE_PIECES[x])
-                WHITE_PIECES.pop(x)
-                return True
-    return False
+                return WHITE_PIECES.pop(x)
+    return None
 
 #pos is position of the mouse during an mousedown event
 # whoTurn is a boolean that is true during whites turn and false during blacks turn
@@ -500,14 +498,19 @@ def main():
                             notCheck = not (isCheck(altcolor, moveTo[0], moveTo[1])) # King cannot move into check --- TODO check if other pieces moving cause check too
                         if(isValid(moveTo[0], moveTo[1], movingPiece) and allow and notCheck): # Not moving on top of teammate and cannot move into check
                             wasJust = movingPiece.letter, movingPiece.number
-                            blackPiece = isCapture(moveTo[0], moveTo[1], movingPiece.color)
+                            oldPiece = isCapture(moveTo[0], moveTo[1], movingPiece.color)
                             attacker = getPieceAttackingKing(altcolor)
                             movingPiece.letter = moveTo[0]
                             movingPiece.number = moveTo[1]
                             if(isCheck(altcolor)):
                                 if(not (len(attacker) == 1 and attacker[0].letter == moveTo[0] and attacker[0].number == moveTo[1])):
                                     movingPiece.letter, movingPiece.number = wasJust
-                                    BLACK_PIECES.append(blackPiece) # Tried to capture but not a valid move
+                                    if(oldPiece != None and WhiteTurn):
+                                        BLACK_PIECES.append(oldPiece) # Tried to capture but not a valid move
+                                        CAPTURED_BLACK_PIECES.pop()
+                                    elif(oldPiece != None):
+                                        WHITE_PIECES.append(oldPiece)
+                                        CAPTURED_WHITE_PIECES.pop()
                                     break
                             #clicked_piece.clear()
                             print("Move Valid moving "+ movingPiece.__str__() + " to "+moveTo.__str__())

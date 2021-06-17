@@ -50,6 +50,8 @@ class King(Piece):
         legalmoves.append(((self.letter-1), (self.number-1)))
         legalmoves.append(((self.letter-1), self.number))
         legalmoves.append((self.letter, (self.number-1)))
+        #legalmoves.append(((self.letter+2), self.number))
+        #legalmoves.append(((self.letter-2), self.number))
         
         return legalmoves
     
