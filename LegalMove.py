@@ -1,4 +1,4 @@
-def LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
+def LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastpiece):
     # DIAGONAL MOVE CHECK
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
         return False
@@ -6,11 +6,17 @@ def LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
             for x in range(len(BLACK_PIECES)):
                 if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                     return True
+                elif(lastpiece.__class__.__name__ == "Pawn"): # En passant check
+                    if(lastpiece.letter == letter and lastpiece.number == (number-1)): # Valid
+                        return True
             return False # Not a capture, hence not valid
     elif(movpiece.color == "black" and movpiece.letter != letter):
             for x in range(len(WHITE_PIECES)):
                 if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
                     return True
+                elif(lastpiece.__class__.__name__ == "Pawn"): # En passant
+                    if(lastpiece.letter == letter and lastpiece.number == (number+1)):
+                        return True
             return False # Not a capture, hence not valid
 
         # FWD MOVE CHECK

@@ -4,10 +4,22 @@ class Piece:
         self.letter = letter
         self.number = number
         self.color = color
-        self.captured = False
+        self.hasMoved = False
 
     def returnLegalMoves():
         return None
+    
+    def move(self, letter, number):
+        firstmove = False
+        if(not self.hasMoved):
+            self.hasMoved = True
+            firstmove = True
+        self.letter = letter
+        self.number = number
+        return firstmove
+    
+    def returnHasMoved(self):
+        return self.hasMoved
 
 
 class Pawn(Piece):
@@ -54,7 +66,7 @@ class King(Piece):
         #legalmoves.append(((self.letter-2), self.number))
         
         return legalmoves
-    
+
     def __str__(self):
         return self.color + " King @ " + chr(96+self.letter) +","+ self.number.__str__()
 

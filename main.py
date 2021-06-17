@@ -23,6 +23,7 @@ WHITE_PIECES = []
 BLACK_PIECES = []
 CAPTURED_WHITE_PIECES = []
 CAPTURED_BLACK_PIECES = []
+lastPiecetoMove = None
 All_PIECES = [] # List of rects for collidepoint()
 clicked_piece = [] # selected piece list will never be greater than 1
 piece = None
@@ -108,7 +109,7 @@ def isValid(letter, number, movpiece):
             if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                 return False
     if(movpiece.__class__.__name__ == "Pawn"): # Check if diag mov is valid and if is first move for that pawn
-        return LegalMove.LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+        return LegalMove.LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)
     elif(movpiece.__class__.__name__ == "Queen"):
         return LegalMove.LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
     elif(movpiece.__class__.__name__ == "Rook"):
@@ -433,17 +434,27 @@ def squareInLegalMoves(attemptedMove, allowedMoves):
     return False
 
 # Remove pieces from other color if on square
-def isCapture(letter, number, color):
-    if(color == "white"):
+def isCapture(letter, number, piece):
+    if(piece.color == "white"):
         for x in range(len(BLACK_PIECES)):
             if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                 CAPTURED_BLACK_PIECES.append(BLACK_PIECES[x])
-                return BLACK_PIECES.pop(x) # Bug where after popping off list would continue through
+                return BLACK_PIECES.pop(x) 
+        if(lastPiecetoMove.__class__.__name__ == "Pawn" and piece.__class__.__name__ == "Pawn" and lastPiecetoMove.letter == letter and lastPiecetoMove.number == (number-1)): # CAPTURE
+            for x in range(len(BLACK_PIECES)): # Find black pawn at letter, number -1
+                if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == (number-1)):
+                    CAPTURED_BLACK_PIECES.append(BLACK_PIECES[x])
+                    return BLACK_PIECES.pop(x)
     else:
         for x in range(len(WHITE_PIECES)):
             if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
                 CAPTURED_WHITE_PIECES.append(WHITE_PIECES[x])
                 return WHITE_PIECES.pop(x)
+        if(lastPiecetoMove.__class__.__name__ == "Pawn" and piece.__class__.__name__ == "Pawn" and lastPiecetoMove.letter == letter and lastPiecetoMove.number == (number+1)): # CAPTURE
+            for x in range(len(WHITE_PIECES)): # Find black pawn at letter, number +_1
+                if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == (number+1)):
+                    CAPTURED_WHITE_PIECES.append(CAPTURED_WHITE_PIECES[x])
+                    return CAPTURED_WHITE_PIECES.pop(x)
     return None
 
 #pos is position of the mouse during an mousedown event
@@ -477,6 +488,7 @@ def main():
     notCheck = True
     global WhiteTurn
     global piece
+    global lastPiecetoMove
     clock = pygame.time.Clock()
     InitializeGameOfChess()
     while Running:
@@ -498,13 +510,14 @@ def main():
                             notCheck = not (isCheck(altcolor, moveTo[0], moveTo[1])) # King cannot move into check --- TODO check if other pieces moving cause check too
                         if(isValid(moveTo[0], moveTo[1], movingPiece) and allow and notCheck): # Not moving on top of teammate and cannot move into check
                             wasJust = movingPiece.letter, movingPiece.number
-                            oldPiece = isCapture(moveTo[0], moveTo[1], movingPiece.color)
+                            oldPiece = isCapture(moveTo[0], moveTo[1], movingPiece)
                             attacker = getPieceAttackingKing(altcolor)
-                            movingPiece.letter = moveTo[0]
-                            movingPiece.number = moveTo[1]
+                            isfirst = movingPiece.move(moveTo[0], moveTo[1])
                             if(isCheck(altcolor)):
                                 if(not (len(attacker) == 1 and attacker[0].letter == moveTo[0] and attacker[0].number == moveTo[1])):
                                     movingPiece.letter, movingPiece.number = wasJust
+                                    if(isfirst): # first move from the piece and was not valid, set hasMoved back to false
+                                        movingPiece.hasMoved = False
                                     if(oldPiece != None and WhiteTurn):
                                         BLACK_PIECES.append(oldPiece) # Tried to capture but not a valid move
                                         CAPTURED_BLACK_PIECES.pop()
@@ -514,6 +527,7 @@ def main():
                                     break
                             #clicked_piece.clear()
                             print("Move Valid moving "+ movingPiece.__str__() + " to "+moveTo.__str__())
+                            lastPiecetoMove = movingPiece
                               # Remove any piece from other team
                             #print(getPieceAttackingKing("white"))
                             #print(getPieceAttackingKing("black"))
