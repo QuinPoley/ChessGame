@@ -122,8 +122,8 @@ def isValid(letter, number, movpiece):
     return True # King legal moves like not moving into check require checks to be defined
 
 def isValidforCheckmate(letter, number, movpiece): 
-    if(movpiece.__class__.__name__ == "Pawn"): # Check if diag mov is valid and if is first move for that pawn
-        return LegalMove.LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    if(movpiece.__class__.__name__ == "Pawn"):
+        return LegalMove.LegalforPawnCheck(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
     elif(movpiece.__class__.__name__ == "Queen"):
         return LegalMove.LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
     elif(movpiece.__class__.__name__ == "Rook"):
@@ -146,7 +146,17 @@ def getPosKing(color):
             if(BLACK_PIECES[x].__class__.__name__ == "King"):
                 return BLACK_PIECES[x]
 
-def isCheck(color, letter=-1, number=-1):
+def popKingOffList(color):
+    if(color == "white"):
+        for x in range(len(WHITE_PIECES)):
+            if(WHITE_PIECES[x].__class__.__name__ == "King"):
+                return WHITE_PIECES.pop(x)
+    else:
+        for x in range(len(BLACK_PIECES)):
+            if(BLACK_PIECES[x].__class__.__name__ == "King"):
+                return BLACK_PIECES.pop(x)
+
+def isCheck(color, letter=-1, number=-1): # BUG WITH PAWNS, They cannot capture directly ahead, but it is a valid move, so the is check function returns true
     if(letter == -1):
         King = getPosKing(color)
         letter = King.letter
@@ -198,8 +208,7 @@ def getPieceAttackingKing(color):
                 listOfPieces.append(WHITE_PIECES[x])
     return listOfPieces
 
-# BUG - If a piece is putting the king in check 1 square away, and is defended by another piece, checkmate is returned as false because technically that move is not valid for the defending piece as its teammate is on the square
-# so, king sees it as a valid move
+
 def isCheckMate(color):
     if(not isCheck(color)):
         return False
@@ -215,16 +224,51 @@ def isCheckMate(color):
     if(len(attackers) == 1):  # Can the piece be captured? NOTE IN THIS CASE ONLY 1 PIECE IS ATTACKING KING
         if(color == "white"):
             cancapture = isCheck("black", attackers[0].letter, attackers[0].number) # is check with args passed in is actually can a piece capture at that square
-            if(cancapture):
-                # MAY STILL BE TRUE, IF MOVING CAPTURING PIECE CAUSES CHECK OR IF PIECE IS DEFENDED
-                return False
+            if(cancapture):  # MAY STILL BE TRUE, IF MOVING CAPTURING PIECE CAUSES CHECK OR IF PIECE IS DEFENDED
+                isdefended = isCheck("white", attackers[0].letter, attackers[0].letter) # Is the piece defended?
+                if(isdefended):
+                    king = popKingOffList("white") # can it be captured by some piece that is not the king?
+                    canstillcapture = isCheck("black", attackers[0].letter, attackers[0].number)
+                    WHITE_PIECES.append(king) # Need to put king back on list
+                    if(canstillcapture): 
+                        return False
+                
         else:
             cancapture = isCheck("white", attackers[0].letter, attackers[0].number) # is check with args passed in is actually can a piece capture at that square
             if(cancapture):
-                # MAY STILL BE TRUE, IF MOVING CAPTURING PIECE CAUSES CHECK OR IF PIECE IS DEFENDED AND CAPTURE IS WITH KING
-                return False
-        
-        # Now check if can be blocked?
+                isdefended = isCheck("black", attackers[0].letter, attackers[0].letter) # Is the piece defended?
+                if(isdefended):
+                    king = popKingOffList("black") # can it be captured by some piece that is not the king?
+                    canstillcapture = isCheck("white", attackers[0].letter, attackers[0].number)
+                    BLACK_PIECES.append(king) # Need to put king back on list
+                    if(canstillcapture):
+                        return False
+
+    # King cannot move, and piece cannot be captured. Can it be blocked?
+    isBlockable = LegalMove.listofblocks(attackers, King, BLACK_PIECES, WHITE_PIECES)
+    if(color == "white"):
+        for x in range(len(WHITE_PIECES)):
+            moves = WHITE_PIECES[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isValid(moves[i][0], moves[i][1], WHITE_PIECES[x])):
+                    validmoves.append((moves[i][0], moves[i][1]))
+            for i in range(len(isBlockable)):
+                if(isBlockable[i] in validmoves): # There is a valid move that blocks the check
+                    return False
+    else:
+        for x in range(len(BLACK_PIECES)):
+            moves = BLACK_PIECES[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isValid(moves[i][0], moves[i][1], BLACK_PIECES[x])):
+                    validmoves.append((moves[i][0], moves[i][1]))
+            for i in range(len(isBlockable)):
+                if(isBlockable[i] in validmoves): # There is a valid move that blocks the check
+                    return False
+    # Now we have a list of possible blocks. Can we move there?
+    #if(isBlockable):
+    #    return False
     return True
     
 def drawChessBoard():
@@ -472,8 +516,16 @@ def main():
                             #print(getPieceAttackingKing("black"))
                             if(isCheckMate(color)):
                                 print("Checkmate")
-                                pygame.quit()
-                                sys.exit()
+                                piece = None
+                                drawWindow()
+                                Winner = myfont.render(altcolor+" wins!", False, colorBlack)
+                                WIN.blit(Winner, (350, 425))
+                                pygame.display.update()
+                                while(True):
+                                    for event in pygame.event.get():
+                                        if event.type == pygame.QUIT:
+                                            pygame.quit()
+                                            sys.exit()
                             elif(isCheck(color)):
                                 print("Check")
                             piece = None 

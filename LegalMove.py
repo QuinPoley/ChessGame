@@ -235,3 +235,59 @@ def LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
         return False
     return True
+
+def listofblocks(att, king, BLACK_PIECES, WHITE_PIECES):
+    if(len(att) > 1 or att[0].__class__.__name__ == "Knight" or att[0].__class__.__name__ == "Pawn"): # Multiple pieces attacking or knight/Pawn, which cannot be blocked only captured
+        return []
+    attX = att[0].letter
+    attY = att[0].number
+    kingX = king.letter
+    kingY = king.number
+    listofValidBlocks = []
+
+    if(attX == kingX): # Same column, block by being in same letter in between numbers
+        
+        if(attY > kingY):
+            for x in range(kingY+1, attY):
+                listofValidBlocks.append((kingX, x)) # square between king and attacker
+        else:
+             for x in range(attY+1, kingY):
+                listofValidBlocks.append((kingX, x))
+
+    elif(attY == kingY): # Same row, block by being in same number in between letters
+        if(attX > kingX):
+            for x in range(kingX+1, attX):
+                listofValidBlocks.append((x, kingY)) # square between king and attacker
+        else:
+             for x in range(attX+1, kingX):
+                listofValidBlocks.append((x, kingY))
+
+    # Diagonal check, but where from
+    elif(attX > kingX and attY > kingY):    # King is down and to the left of piece
+        difference = attX - kingX
+        for x in range(1, difference):
+            listofValidBlocks.append((kingX+x, kingY+x))
+    elif(attX < kingX and attY > kingY):    # King is down and to the right of piece
+        difference = kingX - attX
+        for x in range(1, difference):
+            listofValidBlocks.append((kingX-x, kingY+x))
+    elif(attX > kingX and attY < kingY):    # King is up and to the left of piece
+        difference = attX - kingX
+        for x in range(1, difference):
+            listofValidBlocks.append((kingX+x, kingY-x))
+    elif(attX < kingX and attY < kingY):    # King is up and to the right of piece
+        difference = kingX - attX
+        for x in range(1, difference):
+            listofValidBlocks.append((kingX-x, kingY-x))
+
+    return listofValidBlocks
+
+def LegalforPawnCheck(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES): # Basically can a pawn capture
+    # DIAGONAL MOVE CHECK
+    if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
+        return False
+    if(movpiece.color == "white" and movpiece.letter != letter): # white pawn moving diagonally
+            return True
+    elif(movpiece.color == "black" and movpiece.letter != letter):
+            return True
+    return False    
