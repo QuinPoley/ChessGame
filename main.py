@@ -99,7 +99,7 @@ def InitializeGameOfChess():
         print(BLACK_PIECES[x])
 
 # Make sure there is no piece on the same square that is the same color
-def isValid(letter, number, movpiece): 
+def isValid(letter, number, movpiece): # TODO if castles - check to make sure in between square is not check
     if(movpiece.color == "white"):
         for x in range(len(WHITE_PIECES)):
             if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
@@ -433,6 +433,21 @@ def squareInLegalMoves(attemptedMove, allowedMoves):
             return True
     return False
 
+def moveRookDuringCastle(color, istoRight):
+    default = 1
+    movingTo = 4
+    if(istoRight):
+        default = 8
+        movingTo = 6
+    if(color == "white"):
+        for x in range(len(WHITE_PIECES)):
+            if(WHITE_PIECES[x].number == 1 and WHITE_PIECES[x].letter == default):
+                WHITE_PIECES[x].letter = movingTo # Move Rook to other side
+    else:
+        for x in range(len(BLACK_PIECES)):
+            if(BLACK_PIECES[x].number == 8 and BLACK_PIECES[x].letter == default):
+                BLACK_PIECES[x].letter = movingTo # Move Rook to other side
+
 # Remove pieces from other color if on square
 def isCapture(letter, number, piece):
     if(piece.color == "white"):
@@ -507,11 +522,17 @@ def main():
                         color = "black" if WhiteTurn else "white"
                         altcolor = "white" if WhiteTurn else "black" #current moving
                         if(movingPiece.__class__.__name__ == "King"):
-                            notCheck = not (isCheck(altcolor, moveTo[0], moveTo[1])) # King cannot move into check --- TODO check if other pieces moving cause check too
+                            notCheck = not (isCheck(altcolor, moveTo[0], moveTo[1])) # King cannot move into check
                         if(isValid(moveTo[0], moveTo[1], movingPiece) and allow and notCheck): # Not moving on top of teammate and cannot move into check
                             wasJust = movingPiece.letter, movingPiece.number
                             oldPiece = isCapture(moveTo[0], moveTo[1], movingPiece)
                             attacker = getPieceAttackingKing(altcolor)
+                            if(movingPiece.__class__.__name__ == "King" and (movingPiece.letter+2) == moveTo[0]):
+                                moveRookDuringCastle(movingPiece.color, True)
+                                print("Castles")
+                            if(movingPiece.__class__.__name__ == "King" and (movingPiece.letter-2) == moveTo[0]):
+                                moveRookDuringCastle(movingPiece.color, False)
+                                print("Castles")
                             isfirst = movingPiece.move(moveTo[0], moveTo[1])
                             if(isCheck(altcolor)):
                                 if(not (len(attacker) == 1 and attacker[0].letter == moveTo[0] and attacker[0].number == moveTo[1])):

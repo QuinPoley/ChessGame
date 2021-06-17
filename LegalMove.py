@@ -240,6 +240,70 @@ def LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
 def LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
         return False
+
+    if(letter == (movpiece.letter+2)):  # Trying to castle
+        rook = None
+        king = None
+        if(movpiece.color == "white"):
+            # Spaces 6,1 and 7,1 must be empty and both rook at 8,1 and king cannot have moved
+            for x in range(len(WHITE_PIECES)):
+                if((WHITE_PIECES[x].letter == 6 and WHITE_PIECES[x].number == 1) or (WHITE_PIECES[x].letter == 7 and WHITE_PIECES[x].number == 1)):
+                    return False
+                elif(WHITE_PIECES[x].letter == 8 and WHITE_PIECES[x].number == 1 and WHITE_PIECES[x].hasMoved == False):
+                    rook = WHITE_PIECES[x]
+                elif(WHITE_PIECES[x].letter == 5 and WHITE_PIECES[x].number == 1 and WHITE_PIECES[x].hasMoved == False):
+                    king = WHITE_PIECES[x]
+            for x in range(len(BLACK_PIECES)): # Not that its all that likely, but I guess there cant be a black piece there too
+                if((BLACK_PIECES[x].letter == 6 and BLACK_PIECES[x].number == 1) or (BLACK_PIECES[x].letter == 7 and BLACK_PIECES[x].number == 1)):   # TODO Check if each square is check, because if so, cannot castle
+                    return False
+            if(rook == None or king == None): # One of the pieces was moved or captured
+                return False
+        else:
+            # Spaces 6,8 and 7,8 must be empty and both rook at 8,8 and king cannot have moved
+            for x in range(len(WHITE_PIECES)):
+                if((WHITE_PIECES[x].letter == 6 and WHITE_PIECES[x].number == 8) or (WHITE_PIECES[x].letter == 7 and WHITE_PIECES[x].number == 8)):  # TODO Check if each square is check, because if so, cannot castle
+                    return False
+            for x in range(len(BLACK_PIECES)): 
+                if((BLACK_PIECES[x].letter == 6 and BLACK_PIECES[x].number == 8) or (BLACK_PIECES[x].letter == 7 and BLACK_PIECES[x].number == 8)):  
+                    return False
+                elif(BLACK_PIECES[x].letter == 8 and BLACK_PIECES[x].number == 8 and BLACK_PIECES[x].hasMoved == False):
+                    rook = BLACK_PIECES[x]
+                elif(BLACK_PIECES[x].letter == 5 and BLACK_PIECES[x].number == 8 and BLACK_PIECES[x].hasMoved == False):
+                    king = BLACK_PIECES[x]
+            if(rook == None or king == None): # One of the pieces was moved or captured
+                return False
+
+    elif(letter == (movpiece.letter-2)):   # Trying to castle
+        rook = None
+        king = None
+        if(movpiece.color == "white"):
+            # Spaces 2,1  3,1   4,1 must be empty and both rook at 1,1 and king cannot have moved
+            for x in range(len(WHITE_PIECES)):
+                if((WHITE_PIECES[x].letter == 4 and WHITE_PIECES[x].number == 1) or (WHITE_PIECES[x].letter == 3 and WHITE_PIECES[x].number == 1) or (WHITE_PIECES[x].letter == 2 and WHITE_PIECES[x].number == 1)):
+                    return False
+                elif(WHITE_PIECES[x].letter == 1 and WHITE_PIECES[x].number == 1 and WHITE_PIECES[x].hasMoved == False):
+                    rook = WHITE_PIECES[x]
+                elif(WHITE_PIECES[x].letter == 5 and WHITE_PIECES[x].number == 1 and WHITE_PIECES[x].hasMoved == False):
+                    king = WHITE_PIECES[x]
+            for x in range(len(BLACK_PIECES)): # TODO Check if each square is check, because if so, cannot castle
+                if((BLACK_PIECES[x].letter == 4 and BLACK_PIECES[x].number == 1) or (BLACK_PIECES[x].letter == 3 and BLACK_PIECES[x].number == 1) or (BLACK_PIECES[x].letter == 2 and BLACK_PIECES[x].number == 1)):
+                    return False
+            if(rook == None or king == None): # One of the pieces was moved or captured
+                return False
+        else:
+            # Spaces 2,8  3,8   4,8 must be empty and both rook at 1,8 and king cannot have moved
+            for x in range(len(WHITE_PIECES)): # TODO Check if each square is check, because if so, cannot castle
+                if((WHITE_PIECES[x].letter == 4 and WHITE_PIECES[x].number == 8) or (WHITE_PIECES[x].letter == 3 and WHITE_PIECES[x].number == 8) or (WHITE_PIECES[x].letter == 2 and WHITE_PIECES[x].number == 8)): 
+                    return False
+            for x in range(len(BLACK_PIECES)): 
+                if((BLACK_PIECES[x].letter == 4 and BLACK_PIECES[x].number == 8) or (BLACK_PIECES[x].letter == 3 and BLACK_PIECES[x].number == 8) or (BLACK_PIECES[x].letter == 2 and BLACK_PIECES[x].number == 8)):
+                    return False
+                elif(BLACK_PIECES[x].letter == 1 and BLACK_PIECES[x].number == 8 and BLACK_PIECES[x].hasMoved == False):
+                    rook = BLACK_PIECES[x]
+                elif(BLACK_PIECES[x].letter == 5 and BLACK_PIECES[x].number == 8 and BLACK_PIECES[x].hasMoved == False):
+                    king = BLACK_PIECES[x]
+            if(rook == None or king == None): # One of the pieces was moved or captured
+                return False
     return True
 
 def listofblocks(att, king, BLACK_PIECES, WHITE_PIECES):
