@@ -64,7 +64,6 @@ class King(Piece):
         legalmoves.append((self.letter, (self.number-1)))
         legalmoves.append(((self.letter+2), self.number))
         legalmoves.append(((self.letter-2), self.number))
-        
         return legalmoves
 
     def __str__(self):
@@ -88,7 +87,7 @@ class Queen(Piece):
             legalmoves.append(((self.letter), (self.number+x))) # Direct Fwd
             legalmoves.append(((self.letter+x), (self.number))) # Direct Right
             legalmoves.append(((self.letter-x), (self.number))) # Direct Left
-            legalmoves.append(((self.letter), (self.number-x))) # Direct Back
+            legalmoves.append(((self.letter), (self.number-x))) # Direct Back  
         return legalmoves
     
     def __str__(self):
@@ -158,3 +157,10 @@ class Rook(Piece):
         return self.color + "Rook @" + chr(96+self.letter) +","+ self.number.__str__()
 
 
+#for i in range((len(legalmoves)-1)):
+#            try:
+#                if(legalmoves[i][0] > 8 or legalmoves[i][0] < 1 or legalmoves[i][1] > 8 or legalmoves[i][1] < 1):
+#                    legalmoves.pop(i)
+#            except:
+                #Nothing we popped illegal item off list
+ #               None

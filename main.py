@@ -236,6 +236,8 @@ def isCheckMate(color):
                     WHITE_PIECES.append(king) # Need to put king back on list
                     if(canstillcapture): 
                         return False
+                else:
+                    return False
                 
         else:
             cancapture = isCheck("white", attackers[0].letter, attackers[0].number) # is check with args passed in is actually can a piece capture at that square
@@ -247,6 +249,8 @@ def isCheckMate(color):
                     BLACK_PIECES.append(king) # Need to put king back on list
                     if(canstillcapture):
                         return False
+                else:
+                    return False
 
     # King cannot move, and piece cannot be captured. Can it be blocked?
     isBlockable = LegalMove.listofblocks(attackers, King, BLACK_PIECES, WHITE_PIECES)

@@ -15,7 +15,7 @@ def move(white, black, computerisblack, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PI
                     if(attmoves[x][0] == black[i].letter and attmoves[x][1] == black[i].number):
                         piecethere = True
                 if(piece.__class__.__name__ == "Pawn" and not piecethere):
-                    if(LegalMove.LegalforPawnCheck(attmoves[x][0], attmoves[x][1], piece, black, white)):
+                    if(LegalMove.LegalforPawn(attmoves[x][0], attmoves[x][1], piece, black, white, lastPiecetoMove)):
                         legalmoves.append((attmoves[x][0], attmoves[x][1]))
                 elif(piece.__class__.__name__ == "Queen" and not piecethere):
                     if(LegalMove.LegalforQueen(attmoves[x][0], attmoves[x][1], piece, black, white)):
