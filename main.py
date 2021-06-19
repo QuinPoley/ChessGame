@@ -1,5 +1,6 @@
 import pygame
 import sys
+from pygame.constants import QUIT
 from pygame.draw import rect
 from pygame.scrap import contains
 from pieces import *
@@ -14,6 +15,7 @@ WIN = pygame.display.set_mode([800, 840])
 pygame.display.set_caption("Quin's Chess Game!")
 myfont = pygame.font.SysFont('Comic Sans MS', 30)
 smallfont = pygame.font.SysFont('Times', 20)
+bigTitle = pygame.font.SysFont('Times', 70, bold=True, italic=False)
 clock = pygame.time
 colorWhite = (255, 255, 255)
 colorBlack = (0, 0, 0)
@@ -496,9 +498,41 @@ def whereClick(pos):
     squareX = (x //100) + 1
     squareY = 8 - (y //100)
     return (squareX, squareY)
+
+def drawLoadScreen():
+    WIN.fill(colorBlack)
+    Title = bigTitle.render("Chess", True, colorWhite)
+    PlayGame = smallfont.render("Vs. Computer", True, colorWhite)
+    PlayOnline = smallfont.render("Online", True, colorWhite)
+    Quit = smallfont.render("Quit", True, colorWhite)
+    pygame.draw.rect(WIN, colorRed, pygame.Rect(300, 450, 200, 50))
+    pygame.draw.rect(WIN, colorRed, pygame.Rect(300, 520, 200, 50))
+    pygame.draw.rect(WIN, colorRed, pygame.Rect(300, 590, 200, 50))
+    WIN.blit(Title,(305, 305))
+    WIN.blit(PlayGame,(340, 460))
+    WIN.blit(PlayOnline,(340, 530))
+    WIN.blit(Quit,(340, 600))
+    pygame.display.update()
     
 
 def main():
+    loadScreen = True
+    while loadScreen:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                click = pygame.mouse.get_pos()
+                if(click[0] >= 300 and click[0] <= 500):
+                    if(click[1] >= 450 and click[1] <= 500): # VS AI
+                        loadScreen = False
+                    elif(click[1] >= 520 and click[1] <= 570): # NETWORKING
+                        print("Nope.")
+                    elif(click[1] >= 590 and click[1] <= 640): #NO PLAY
+                        pygame.quit()
+                        sys.exit()
+        drawLoadScreen()
     Running = True
     notCheck = True
     global WhiteTurn
@@ -547,7 +581,7 @@ def main():
                                         CAPTURED_WHITE_PIECES.pop()
                                     break
                             #clicked_piece.clear()
-                            print("Move Valid moving "+ movingPiece.__str__() + " to "+moveTo.__str__())
+                            print(movingPiece.color + movingPiece.__class__.__name__ + " @"+ chr(wasJust[0]+96) +","+str(wasJust[1]) +" to "+chr(moveTo[0]+96)+","+str(moveTo[1]))
                             lastPiecetoMove = movingPiece
                               # Remove any piece from other team
                             #print(getPieceAttackingKing("white"))
