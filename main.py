@@ -125,21 +125,6 @@ def isValid(letter, number, movpiece): # TODO if castles - check to make sure in
         return LegalMove.LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
     return True # King legal moves like not moving into check require checks to be defined
 
-def isValidforCheckmate(letter, number, movpiece): 
-    if(movpiece.__class__.__name__ == "Pawn"):
-        return LegalMove.LegalforPawnCheck(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    elif(movpiece.__class__.__name__ == "Queen"):
-        return LegalMove.LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    elif(movpiece.__class__.__name__ == "Rook"):
-        return LegalMove.LegalforRook(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    elif(movpiece.__class__.__name__ == "Bishop"):
-        return LegalMove.LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    elif(movpiece.__class__.__name__ == "Knight"):
-        return LegalMove.LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    elif(movpiece.__class__.__name__ == "King"):
-        return LegalMove.LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
-    return True # King legal moves like not moving into check require checks to be defined
-
 def getPosKing(color):
     if(color == "white"):
         for x in range(len(WHITE_PIECES)):
@@ -160,7 +145,7 @@ def popKingOffList(color):
             if(BLACK_PIECES[x].__class__.__name__ == "King"):
                 return BLACK_PIECES.pop(x)
 
-def isCheck(color, letter=-1, number=-1): # BUG WITH PAWNS, They cannot capture directly ahead, but it is a valid move, so the is check function returns true
+def isCheck(color, letter=-1, number=-1): # BUG WITH PAWNS, They cannot capture directly ahead, but it is a valid move, so the is check function returns true FIXED
     if(letter == -1):
         King = getPosKing(color)
         letter = King.letter
@@ -172,7 +157,7 @@ def isCheck(color, letter=-1, number=-1): # BUG WITH PAWNS, They cannot capture 
             moves = BLACK_PIECES[x].returnLegalMoves()
             validmoves = []
             for i in range(len(moves)):
-                if(isValidforCheckmate(moves[i][0], moves[i][1], BLACK_PIECES[x])):
+                if(LegalMove.isSquareCapturable(moves[i][0], moves[i][1], BLACK_PIECES[x], BLACK_PIECES, WHITE_PIECES)):
                     validmoves.append((moves[i][0], moves[i][1]))
             if((letter, number) in validmoves):
                 whiteInCheck = True
@@ -182,7 +167,7 @@ def isCheck(color, letter=-1, number=-1): # BUG WITH PAWNS, They cannot capture 
             moves = WHITE_PIECES[x].returnLegalMoves()
             validmoves = []
             for i in range(len(moves)):
-                if(isValidforCheckmate(moves[i][0], moves[i][1], WHITE_PIECES[x])):
+                if(LegalMove.isSquareCapturable(moves[i][0], moves[i][1], WHITE_PIECES[x], BLACK_PIECES, WHITE_PIECES)):
                     validmoves.append((moves[i][0], moves[i][1]))
             if((letter, number) in validmoves):
                 blackInCheck = True

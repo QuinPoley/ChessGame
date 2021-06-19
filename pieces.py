@@ -215,23 +215,3 @@ class Rook(Piece):
     
     def __str__(self):
         return self.color + "Rook @" + chr(96+self.letter) +","+ self.number.__str__()
-
-
-#for i in range((len(legalmoves)-1)):
-#            try:
-#                if(legalmoves[i][0] > 8 or legalmoves[i][0] < 1 or legalmoves[i][1] > 8 or legalmoves[i][1] < 1):
-#                    legalmoves.pop(i)
-#            except:
-                #Nothing we popped illegal item off list
- #               None
- #for x in range(1, 8):
- #           legalmoves.append(((self.letter), (self.number+x))) # Direct Fwd
-  #          legalmoves.append(((self.letter+x), (self.number))) # Direct Right
-           # legalmoves.append(((self.letter-x), (self.number))) # Direct Left
-            
-            #legalmoves.append(((self.letter), (self.number-x))) # Direct Back
-#for x in range(1, 8):
-            #legalmoves.append(((self.letter+x), (self.number+x))) # Diag Fwd Right
-            #legalmoves.append(((self.letter-x), (self.number+x))) # Diag Fwd Left
-            #legalmoves.append(((self.letter+x), (self.number-x))) # Diag Back Right
-            #legalmoves.append(((self.letter-x), (self.number-x))) # Diag Back Left
