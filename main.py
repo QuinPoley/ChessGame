@@ -591,10 +591,7 @@ def main():
         clock.tick(30)
         drawWindow()
         if(not playersMove): # Computer's move, or other player if online
-            rslt = ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
-            #while not rslt: # Try again
-               
-            #    rslt = ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
+            ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
             playersMove = True
             WhiteTurn = False if WhiteTurn else True 
 
