@@ -33,6 +33,7 @@ WhiteTurn = True
 whiteInCheck = False
 blackInCheck = False
 playerIsWhite = True
+playersMove = playerIsWhite
 
 #   SPRITES     #
 wKing = pygame.image.load("Images/WhiteKing.png")
@@ -450,30 +451,6 @@ def moveRookDuringCastle(color, istoRight):
             if(BLACK_PIECES[x].number == 8 and BLACK_PIECES[x].letter == default):
                 BLACK_PIECES[x].letter = movingTo # Move Rook to other side
 
-# Remove pieces from other color if on square
-def isCapture(letter, number, piece):
-    if(piece.color == "white"):
-        for x in range(len(BLACK_PIECES)):
-            if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
-                CAPTURED_BLACK_PIECES.append(BLACK_PIECES[x])
-                return BLACK_PIECES.pop(x) 
-        if(lastPiecetoMove.__class__.__name__ == "Pawn" and piece.__class__.__name__ == "Pawn" and lastPiecetoMove.letter == letter and lastPiecetoMove.number == (number-1)): # CAPTURE
-            for x in range(len(BLACK_PIECES)): # Find black pawn at letter, number -1
-                if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == (number-1)):
-                    CAPTURED_BLACK_PIECES.append(BLACK_PIECES[x])
-                    return BLACK_PIECES.pop(x)
-    else:
-        for x in range(len(WHITE_PIECES)):
-            if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
-                CAPTURED_WHITE_PIECES.append(WHITE_PIECES[x])
-                return WHITE_PIECES.pop(x)
-        if(lastPiecetoMove.__class__.__name__ == "Pawn" and piece.__class__.__name__ == "Pawn" and lastPiecetoMove.letter == letter and lastPiecetoMove.number == (number+1)): # CAPTURE
-            for x in range(len(WHITE_PIECES)): # Find black pawn at letter, number +_1
-                if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == (number+1)):
-                    CAPTURED_WHITE_PIECES.append(CAPTURED_WHITE_PIECES[x])
-                    return CAPTURED_WHITE_PIECES.pop(x)
-    return None
-
 #pos is position of the mouse during an mousedown event
 # whoTurn is a boolean that is true during whites turn and false during blacks turn
 def clickOnPiece(pos, whoTurn):
@@ -538,6 +515,7 @@ def main():
     global WhiteTurn
     global piece
     global lastPiecetoMove
+    global playersMove
     clock = pygame.time.Clock()
     InitializeGameOfChess()
     while Running:
@@ -546,65 +524,75 @@ def main():
                 Running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                movingPiece = clickOnPiece(pos, WhiteTurn) # some time click on piece
-                notCheck = True
-                if(movingPiece != None): # There is a piece selected, trying to move it  len(clicked_piece) > 0 and 
-                    if(WhiteTurn and movingPiece.color == "white" or not WhiteTurn and movingPiece.color == "black"): # If it is white's turn needs to be white piece moving
-                        moveTo = whereClick(pos)
-                        moves = movingPiece.returnLegalMoves()
-                        allow = squareInLegalMoves(moveTo, moves)
-                        color = "black" if WhiteTurn else "white"
-                        altcolor = "white" if WhiteTurn else "black" #current moving
-                        if(movingPiece.__class__.__name__ == "King"):
-                            notCheck = not (isCheck(altcolor, moveTo[0], moveTo[1])) # King cannot move into check
-                        if(isValid(moveTo[0], moveTo[1], movingPiece) and allow and notCheck): # Not moving on top of teammate and cannot move into check
-                            wasJust = movingPiece.letter, movingPiece.number
-                            oldPiece = isCapture(moveTo[0], moveTo[1], movingPiece)
-                            attacker = getPieceAttackingKing(altcolor)
-                            if(movingPiece.__class__.__name__ == "King" and (movingPiece.letter+2) == moveTo[0]):
-                                moveRookDuringCastle(movingPiece.color, True)
-                                print("Castles")
-                            if(movingPiece.__class__.__name__ == "King" and (movingPiece.letter-2) == moveTo[0]):
-                                moveRookDuringCastle(movingPiece.color, False)
-                                print("Castles")
-                            isfirst = movingPiece.move(moveTo[0], moveTo[1])
-                            if(isCheck(altcolor)):
-                                if(not (len(attacker) == 1 and attacker[0].letter == moveTo[0] and attacker[0].number == moveTo[1])):
-                                    movingPiece.letter, movingPiece.number = wasJust
-                                    if(isfirst): # first move from the piece and was not valid, set hasMoved back to false
-                                        movingPiece.hasMoved = False
-                                    if(oldPiece != None and WhiteTurn):
-                                        BLACK_PIECES.append(oldPiece) # Tried to capture but not a valid move
-                                        CAPTURED_BLACK_PIECES.pop()
-                                    elif(oldPiece != None):
-                                        WHITE_PIECES.append(oldPiece)
-                                        CAPTURED_WHITE_PIECES.pop()
-                                    break
-                            #clicked_piece.clear()
-                            print(movingPiece.color + movingPiece.__class__.__name__ + " @"+ chr(wasJust[0]+96) +","+str(wasJust[1]) +" to "+chr(moveTo[0]+96)+","+str(moveTo[1]))
-                            lastPiecetoMove = movingPiece
-                              # Remove any piece from other team
-                            #print(getPieceAttackingKing("white"))
-                            #print(getPieceAttackingKing("black"))
-                            if(isCheckMate(color)):
-                                print("Checkmate")
-                                piece = None
-                                drawWindow()
-                                Winner = myfont.render(altcolor+" wins!", False, colorBlack)
-                                WIN.blit(Winner, (350, 425))
-                                pygame.display.update()
-                                while(True):
-                                    for event in pygame.event.get():
-                                        if event.type == pygame.QUIT:
-                                            pygame.quit()
-                                            sys.exit()
-                            elif(isCheck(color)):
-                                print("Check")
-                            piece = None 
-                            WhiteTurn = False if WhiteTurn else True                
+                if(playersMove): # Only select pieces for players move
+                    movingPiece = clickOnPiece(pos, WhiteTurn) # some time click on piece
+                    notCheck = True
+                    if(movingPiece != None): # There is a piece selected, trying to move it  len(clicked_piece) > 0 and 
+                        if(WhiteTurn and movingPiece.color == "white" or not WhiteTurn and movingPiece.color == "black"): # If it is white's turn needs to be white piece moving
+                            moveTo = whereClick(pos)
+                            moves = movingPiece.returnLegalMoves()
+                            allow = squareInLegalMoves(moveTo, moves)
+                            color = "black" if WhiteTurn else "white"
+                            altcolor = "white" if WhiteTurn else "black" #current moving
+                            if(movingPiece.__class__.__name__ == "King"):
+                                notCheck = not (isCheck(altcolor, moveTo[0], moveTo[1])) # King cannot move into check
+                            if(isValid(moveTo[0], moveTo[1], movingPiece) and allow and notCheck): # Not moving on top of teammate and cannot move into check
+                                wasJust = movingPiece.letter, movingPiece.number
+                                oldPiece = LegalMove.isCapture(moveTo[0], moveTo[1], movingPiece, BLACK_PIECES, WHITE_PIECES, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
+                                attacker = getPieceAttackingKing(altcolor)
+                                if(movingPiece.__class__.__name__ == "King" and (movingPiece.letter+2) == moveTo[0]):
+                                    moveRookDuringCastle(movingPiece.color, True)
+                                    print("Castles")
+                                if(movingPiece.__class__.__name__ == "King" and (movingPiece.letter-2) == moveTo[0]):
+                                    moveRookDuringCastle(movingPiece.color, False)
+                                    print("Castles")
+                                isfirst = movingPiece.move(moveTo[0], moveTo[1])
+                                if(isCheck(altcolor)):
+                                    if(not (len(attacker) == 1 and attacker[0].letter == moveTo[0] and attacker[0].number == moveTo[1])):
+                                        movingPiece.letter, movingPiece.number = wasJust
+                                        if(isfirst): # first move from the piece and was not valid, set hasMoved back to false
+                                            movingPiece.hasMoved = False
+                                        if(oldPiece != None and WhiteTurn):
+                                            BLACK_PIECES.append(oldPiece) # Tried to capture but not a valid move
+                                            CAPTURED_BLACK_PIECES.pop()
+                                        elif(oldPiece != None):
+                                            WHITE_PIECES.append(oldPiece)
+                                            CAPTURED_WHITE_PIECES.pop()
+                                        break
+                                #clicked_piece.clear()
+                                print(movingPiece.color + movingPiece.__class__.__name__ + " @"+ chr(wasJust[0]+96) +","+str(wasJust[1]) +" to "+chr(moveTo[0]+96)+","+str(moveTo[1]))
+                                lastPiecetoMove = movingPiece
+                                # Remove any piece from other team
+                                #print(getPieceAttackingKing("white"))
+                                #print(getPieceAttackingKing("black"))
+                                if(isCheckMate(color)):
+                                    print("Checkmate")
+                                    piece = None
+                                    drawWindow()
+                                    Winner = myfont.render(altcolor+" wins!", False, colorBlack)
+                                    WIN.blit(Winner, (350, 425))
+                                    pygame.display.update()
+                                    while(True):
+                                        for event in pygame.event.get():
+                                            if event.type == pygame.QUIT:
+                                                pygame.quit()
+                                                sys.exit()
+                                elif(isCheck(color)):
+                                    print("Check")
+                                piece = None 
+                                WhiteTurn = False if WhiteTurn else True 
+                                playersMove = False
+                    
+                        
         clock.tick(30)
         drawWindow()
-       
+        if(not playersMove): # Computer's move, or other player if online
+            rslt = ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
+            #while not rslt: # Try again
+               
+            #    rslt = ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
+            playersMove = True
+            WhiteTurn = False if WhiteTurn else True 
 
         
     pygame.quit()

@@ -361,3 +361,27 @@ def LegalforPawnCheck(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES): # B
     elif(movpiece.color == "black" and movpiece.letter != letter):
             return True
     return False    
+
+# Remove pieces from other color if on square
+def isCapture(letter, number, piece, BLACK_PIECES, WHITE_PIECES, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove):
+    if(piece.color == "white"):
+        for x in range(len(BLACK_PIECES)):
+            if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
+                CAPTURED_BLACK_PIECES.append(BLACK_PIECES[x])
+                return BLACK_PIECES.pop(x) 
+        if(lastPiecetoMove.__class__.__name__ == "Pawn" and piece.__class__.__name__ == "Pawn" and lastPiecetoMove.letter == letter and lastPiecetoMove.number == (number-1)): # CAPTURE
+            for x in range(len(BLACK_PIECES)): # Find black pawn at letter, number -1
+                if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == (number-1)):
+                    CAPTURED_BLACK_PIECES.append(BLACK_PIECES[x])
+                    return BLACK_PIECES.pop(x)
+    else:
+        for x in range(len(WHITE_PIECES)):
+            if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
+                CAPTURED_WHITE_PIECES.append(WHITE_PIECES[x])
+                return WHITE_PIECES.pop(x)
+        if(lastPiecetoMove.__class__.__name__ == "Pawn" and piece.__class__.__name__ == "Pawn" and lastPiecetoMove.letter == letter and lastPiecetoMove.number == (number+1)): # CAPTURE
+            for x in range(len(WHITE_PIECES)): # Find black pawn at letter, number +_1
+                if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == (number+1)):
+                    CAPTURED_WHITE_PIECES.append(WHITE_PIECES[x])
+                    return WHITE_PIECES.pop(x)
+    return None
