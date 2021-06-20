@@ -422,3 +422,59 @@ def isSafe(color, letter, number, BLACK_PIECES, WHITE_PIECES): # BUG WITH PAWNS,
                 return True
     return False
 
+# Make sure there is no piece on the same square that is the same color
+def isValid(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastPiecetoMove): # TODO if castles - check to make sure in between square is not check
+    if(movpiece.color == "white"):
+        for x in range(len(WHITE_PIECES)):
+            if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
+                return False
+    else:
+        for x in range(len(BLACK_PIECES)):
+            if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
+                return False
+    if(movpiece.__class__.__name__ == "Pawn"): # Check if diag mov is valid and if is first move for that pawn
+        return LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)
+    elif(movpiece.__class__.__name__ == "Queen"):
+        return LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Rook"):
+        return LegalforRook(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Bishop"):
+        return LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "Knight"):
+        return LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    elif(movpiece.__class__.__name__ == "King"):
+        return LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+    return True # King legal moves like not moving into check require checks to be defined
+
+def getPosKing(ListOPieces):
+    for x in range(len(ListOPieces)):
+        if(ListOPieces[x].__class__.__name__ == "King"):
+            return ListOPieces[x]
+    
+def causesCheck(color, BLACK_PIECES, WHITE_PIECES):
+    King = None
+    if(color == "white"):
+        King = getPosKing(WHITE_PIECES)
+    else:
+        King = getPosKing(BLACK_PIECES)
+    letter = King.letter
+    number = King.number
+    if(color == "white"): # is white in check?
+        for x in range(len(BLACK_PIECES)):
+            moves = BLACK_PIECES[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isSquareCapturable(moves[i][0], moves[i][1], BLACK_PIECES[x], BLACK_PIECES, WHITE_PIECES)):
+                    validmoves.append((moves[i][0], moves[i][1]))
+            if((letter, number) in validmoves):
+                return True       
+    else: # is black in check?
+        for x in range(len(WHITE_PIECES)):
+            moves = WHITE_PIECES[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isSquareCapturable(moves[i][0], moves[i][1], WHITE_PIECES[x], BLACK_PIECES, WHITE_PIECES)):
+                    validmoves.append((moves[i][0], moves[i][1]))
+            if((letter, number) in validmoves):
+                return True
+    return False
