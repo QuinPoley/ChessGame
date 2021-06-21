@@ -7,7 +7,7 @@ def LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastpiece
                 if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                     return True
                 elif(lastpiece.__class__.__name__ == "Pawn"): # En passant check
-                    if(lastpiece.letter == letter and lastpiece.number == (number-1)): # Valid
+                    if(lastpiece.letter == letter and lastpiece.number == (number-1) and lastpiece.number == 5): # Valid
                         return True
             return False # Not a capture, hence not valid
     elif(movpiece.color == "black" and movpiece.letter != letter):
@@ -15,7 +15,7 @@ def LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastpiece
                 if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
                     return True
                 elif(lastpiece.__class__.__name__ == "Pawn"): # En passant
-                    if(lastpiece.letter == letter and lastpiece.number == (number+1)):
+                    if(lastpiece.letter == letter and lastpiece.number == (number+1) and lastpiece.number == 4):
                         return True
             return False # Not a capture, hence not valid
 
@@ -478,3 +478,19 @@ def causesCheck(color, BLACK_PIECES, WHITE_PIECES):
             if((letter, number) in validmoves):
                 return True
     return False
+
+def isPawnAtFinalRank(lastpiece):
+    if(lastpiece.__class__.__name__ == "Pawn" and (lastpiece.number == 1 and lastpiece.color == "black") or (lastpiece.number == 8 and lastpiece.color == "white")):
+        return True
+    return False
+
+# Call at end of turn
+def promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, changeTo):
+    for x in range(len(BLACK_PIECES)):
+        if(BLACK_PIECES[x].__class__.__name__ == "Pawn" and BLACK_PIECES[x].number == 1):
+            BLACK_PIECES.pop(x)
+            BLACK_PIECES.append(changeTo)
+    for x in range(len(WHITE_PIECES)):
+        if(WHITE_PIECES[x].__class__.__name__ == "Pawn" and WHITE_PIECES[x].number == 8):
+            WHITE_PIECES.pop(x)
+            WHITE_PIECES.append(changeTo)

@@ -382,6 +382,9 @@ def drawWindow():
     drawBottomBar()
     pygame.display.update()
 
+def promoteGUI(piecetopromote):
+    return Queen(piecetopromote.color, piecetopromote.letter, piecetopromote.number)
+
 def pieceAt(tupSquare, whoTurn):
     Xval, Yval = tupSquare
     if(whoTurn):
@@ -528,6 +531,10 @@ def main():
                                 #clicked_piece.clear()
                                 print(movingPiece.color + movingPiece.__class__.__name__ + " @"+ chr(wasJust[0]+96) +","+str(wasJust[1]) +" to "+chr(moveTo[0]+96)+","+str(moveTo[1]))
                                 lastPiecetoMove = movingPiece
+                                promote = LegalMove.isPawnAtFinalRank(lastPiecetoMove)
+                                if(promote):
+                                    promotedpiece = promoteGUI(lastPiecetoMove)
+                                    LegalMove.promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, promotedpiece)
                                 if(isCheckMate(color)):
                                     print("Checkmate")
                                     piece = None
@@ -553,6 +560,11 @@ def main():
             move = ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
             move[0].move(move[1], move[2])
             LegalMove.isCapture(move[1], move[2], move[0], BLACK_PIECES, WHITE_PIECES, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
+            lastPiecetoMove = move[0]
+            promote = LegalMove.isPawnAtFinalRank(lastPiecetoMove)
+            if(promote):
+                promotedpiece = promoteGUI(lastPiecetoMove)
+                LegalMove.promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, promotedpiece)
             playersMove = True
             WhiteTurn = False if WhiteTurn else True 
 
