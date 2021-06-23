@@ -11,10 +11,10 @@ import Engine
 pygame.init()
 pygame.font.init()
 
-WIN = pygame.display.set_mode([800, 840])
+WIN = pygame.display.set_mode([830, 870])
 
 pygame.display.set_caption("Quin's Chess Game!")
-myfont = pygame.font.SysFont('Comic Sans MS', 30)
+myfont = pygame.font.SysFont('Cambria', 30)
 smallfont = pygame.font.SysFont('Times', 20)
 bigTitle = pygame.font.SysFont('Times', 70, bold=True, italic=False)
 clock = pygame.time
@@ -22,6 +22,8 @@ colorWhite = (255, 255, 255)
 colorBlack = (0, 0, 0)
 colorRed = (255, 0, 0)
 colorSalmon = (255, 160, 122)
+colorDarkRed  = (215, 51, 51)
+colorBrown = (110, 38, 14)
 WHITE_PIECES = []
 BLACK_PIECES = []
 CAPTURED_WHITE_PIECES = []
@@ -252,19 +254,14 @@ def drawChessBoard():
                     pygame.draw.rect(WIN, colorTan, pygame.Rect((x*100), (y*100), 100, 100))
                 else:
                     # Green
-                    pygame.draw.rect(WIN, colorGreen, pygame.Rect((x*100), (y*100), 100, 100))
+                    pygame.draw.rect(WIN, colorBrown, pygame.Rect((x*100), (y*100), 100, 100))
             else:
                 if(y % 2 == 0):
                     #Green
-                    pygame.draw.rect(WIN, colorGreen, pygame.Rect((x*100), (y*100), 100, 100))
+                    pygame.draw.rect(WIN, colorBrown, pygame.Rect((x*100), (y*100), 100, 100))
                 else:
                     #Tan
                     pygame.draw.rect(WIN, colorTan, pygame.Rect((x*100), (y*100), 100, 100))
-    for x in range(8):
-        rownumber = myfont.render((x+1).__str__(), False, (0, 0, 0))
-        WIN.blit(rownumber,(5,(750-100*x)))
-        columnletter = myfont.render(chr(97+x).capitalize(), False, (0, 0, 0))
-        WIN.blit(columnletter,((100*x +70),0))
     global piece # Check if a piece is selected, highlight square underneath
     if(piece != None):
         selectedX = (piece.letter * 100) - 100 # 1 Indexed
@@ -276,7 +273,27 @@ def drawChessBoard():
             if(LegalMove.isValid(ValidMoveSet[x][0], ValidMoveSet[x][1], piece, BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)):
                 validmovX = (ValidMoveSet[x][0] * 100) - 100
                 validmovY = 800 - (ValidMoveSet[x][1] * 100)
-                pygame.draw.rect(WIN, colorSalmon, pygame.Rect(validmovX, validmovY, 100, 100))
+                if((validmovX //100) % 2 == 0):
+                    if((validmovY//100) % 2 == 0):
+                        pygame.draw.rect(WIN, colorSalmon, pygame.Rect(validmovX, validmovY, 100, 100))  
+                    else:
+                        pygame.draw.rect(WIN, colorDarkRed, pygame.Rect(validmovX, validmovY, 100, 100))  
+                else:
+                    if((validmovY//100) % 2 == 0):
+                        pygame.draw.rect(WIN, colorDarkRed, pygame.Rect(validmovX, validmovY, 100, 100))  
+                    else:
+                        pygame.draw.rect(WIN, colorSalmon, pygame.Rect(validmovX, validmovY, 100, 100))  
+                  
+    for x in range(8):
+        rownumber = myfont.render((x+1).__str__(), False, (0, 0, 0))
+        WIN.blit(rownumber,(802,(840-100*(x+1))))
+        columnletter = myfont.render(chr(97+x).capitalize(), False, (0, 0, 0))
+        WIN.blit(columnletter,((100*x +40),800))
+        pygame.draw.line(WIN, colorBlack, (0, 100*x) , (830, 100*x))
+        pygame.draw.line(WIN, colorBlack, (100*x, 0) , (100*x, 830))
+    pygame.draw.line(WIN, colorBlack, (0, 800) , (830, 800))
+    pygame.draw.line(WIN, colorBlack, (800, 0) , (800, 830))
+    
             
 
 
@@ -332,17 +349,17 @@ def drawChessPieces():
     drawSelectedPiece()
 
 def drawBottomBar():
+    pygame.draw.rect(WIN, (76, 76, 76), pygame.Rect(0, 830, 830, 40))
     white = smallfont.render("White", False, colorWhite)
     black = smallfont.render("Black", False, colorWhite)
     #WIN.blit(turn,(625,760))
-    WIN.blit(white,(700, 810))
-    WIN.blit(black,(50, 810))
+    WIN.blit(white,(700, 840))
+    WIN.blit(black,(50, 840))
     if(WhiteTurn):
         x = 760
     else:
         x = 30
-    pygame.draw.rect(WIN, (212, 175, 55), pygame.Rect(x, 817, 10, 10))
-    #pygame.draw.rect(WIN, (212, 175, 55), pygame.Rect(660, 810, 20, 20))
+    pygame.draw.rect(WIN, (212, 175, 55), pygame.Rect(x, 847, 10, 10))
     for x in range(len(CAPTURED_WHITE_PIECES)):
         surf = pygame.Surface((20, 20), pygame.SRCALPHA)
         if(CAPTURED_WHITE_PIECES[x].__class__.__name__ == "Pawn"):
@@ -357,7 +374,7 @@ def drawBottomBar():
             surf.blit(swKnight, (0,0))
         elif(CAPTURED_WHITE_PIECES[x].__class__.__name__ == "Rook"):
             surf.blit(swRook, (0,0)) 
-        WIN.blit(surf, ((100 + (20*x)), 815))
+        WIN.blit(surf, ((100 + (20*x)), 845))
         
         
     for x in range(len(CAPTURED_BLACK_PIECES)):
@@ -374,10 +391,10 @@ def drawBottomBar():
             surf.blit(sbKnight, (0,0))
         elif(CAPTURED_BLACK_PIECES[x].__class__.__name__ == "Rook"):
             surf.blit(sbRook, (0,0)) 
-        WIN.blit(surf, ((680 - (20*x)), 815))
+        WIN.blit(surf, ((680 - (20*x)), 845))
 
 def drawWindow():
-    WIN.fill((76, 76, 76))
+    WIN.fill(colorWhite)
     drawChessBoard()
     drawChessPieces()
     drawBottomBar()
