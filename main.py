@@ -6,6 +6,7 @@ from pygame.scrap import contains
 from pieces import *
 import LegalMove
 import ai
+import Engine
 
 pygame.init()
 pygame.font.init()
@@ -436,7 +437,14 @@ def clickOnPiece(pos, whoTurn):
     if(pieceTmp != None):
         piece = pieceTmp
     return piece
-    
+
+def printEngineEval(WHITE_PIECES, BLACK_PIECES):
+    values = Engine.Eval(WHITE_PIECES, BLACK_PIECES)
+    print("White Material :"+str(values[0])) 
+    print("Black Material :"+str(values[1]))  
+    print("White/Black Controlled Squares :"+str(values[2]))  
+    print("White King Safety :"+str(values[3])) 
+    print("Black King Safety :"+str(values[4]))
 
 def whereClick(pos):
     x, y = pos
@@ -552,6 +560,7 @@ def main():
                                 piece = None 
                                 WhiteTurn = False if WhiteTurn else True 
                                 playersMove = False
+                                printEngineEval(WHITE_PIECES, BLACK_PIECES)
                     
                         
         clock.tick(30)
@@ -567,6 +576,7 @@ def main():
                 LegalMove.promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, promotedpiece)
             playersMove = True
             WhiteTurn = False if WhiteTurn else True 
+            printEngineEval(WHITE_PIECES, BLACK_PIECES)
 
         
     pygame.quit()

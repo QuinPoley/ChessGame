@@ -494,3 +494,15 @@ def promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, changeTo):
         if(WHITE_PIECES[x].__class__.__name__ == "Pawn" and WHITE_PIECES[x].number == 8):
             WHITE_PIECES.pop(x)
             WHITE_PIECES.append(changeTo)
+
+
+def isValidforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES): # TODO if castles - check to make sure in between square is not check
+    if(movpiece.color == "white"):
+        for x in range(len(WHITE_PIECES)):
+            if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):
+                return False
+    else:
+        for x in range(len(BLACK_PIECES)):
+            if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
+                return False
+    return LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
