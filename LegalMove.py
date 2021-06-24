@@ -306,7 +306,7 @@ def LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
                 return False
     return True
 
-def listofblocks(att, king, BLACK_PIECES, WHITE_PIECES):
+def listofblocks(att, king):
     if(len(att) > 1 or att[0].__class__.__name__ == "Knight" or att[0].__class__.__name__ == "Pawn"): # Multiple pieces attacking or knight/Pawn, which cannot be blocked only captured
         return []
     attX = att[0].letter
@@ -361,6 +361,33 @@ def LegalforPawnCheck(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES): # B
     elif(movpiece.color == "black" and movpiece.letter != letter):
             return True
     return False    
+
+def getPieceAttackingKing(color, WHITE_PIECES, BLACK_PIECES, lastPiecetoMove):
+    King = None
+    if(color == "white"):
+        King = getPosKing(WHITE_PIECES)
+    else:
+        King = getPosKing(BLACK_PIECES)
+    listOfPieces = []
+    if(color == "white"): # is white in check?
+        for x in range(len(BLACK_PIECES)):
+            moves = BLACK_PIECES[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isValid(moves[i][0], moves[i][1], BLACK_PIECES[x], BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)):
+                    validmoves.append((moves[i][0], moves[i][1]))
+            if((King.letter, King.number) in validmoves):
+                listOfPieces.append(BLACK_PIECES[x])      
+    else: # is black in check?
+        for x in range(len(WHITE_PIECES)):
+            moves = WHITE_PIECES[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isValid(moves[i][0], moves[i][1], WHITE_PIECES[x], BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)):
+                    validmoves.append((moves[i][0], moves[i][1]))
+            if((King.letter, King.number) in validmoves):
+                listOfPieces.append(WHITE_PIECES[x])
+    return listOfPieces
 
 # Remove pieces from other color if on square
 def isCapture(letter, number, piece, BLACK_PIECES, WHITE_PIECES, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove):
@@ -423,7 +450,23 @@ def isSafe(color, letter, number, BLACK_PIECES, WHITE_PIECES): # BUG WITH PAWNS,
     return False
 
 # Make sure there is no piece on the same square that is the same color
-def isValid(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastPiecetoMove): # TODO if castles - check to make sure in between square is not check
+def isValid(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastPiecetoMove, blackcheck=False, whitecheck=False): # TODO if castles - check to make sure in between square is not check
+    if(blackcheck or whitecheck):
+        #somebody in check - better be the person moving. Otherwise I screwed up.
+        if((blackcheck and lastPiecetoMove.color == "black") or (whitecheck and lastPiecetoMove.color == "white")):
+            print("Yeah, I screwed up. Should be game over.")
+            return False
+        else:
+            attackers = getPieceAttackingKing(movpiece.color, WHITE_PIECES, BLACK_PIECES, lastPiecetoMove)
+            king = None
+            if(movpiece.color == "white"):
+                king = getPosKing(WHITE_PIECES)
+            else:
+                king = getPosKing(BLACK_PIECES)
+            allowedmoves = listofblocks(attackers, king)
+            if(not (letter, number) in allowedmoves and not movpiece.__class__.__name__ == "King"):
+                return False
+            # letter and number must be in list of blocks. OR movpiece must be king.
     if(movpiece.color == "white"):
         for x in range(len(WHITE_PIECES)):
             if(WHITE_PIECES[x].letter == letter and WHITE_PIECES[x].number == number):

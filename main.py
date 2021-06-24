@@ -124,7 +124,7 @@ def isCheck(color, letter=-1, number=-1):
         letter = King.letter
         number = King.number
     #print(letter, number)
-    global whiteInCheck, blackInCheck
+    
     if(color == "white"): # is white in check?
         for x in range(len(BLACK_PIECES)):
             moves = BLACK_PIECES[x].returnLegalMoves()
@@ -133,7 +133,6 @@ def isCheck(color, letter=-1, number=-1):
                 if(LegalMove.isSquareCapturable(moves[i][0], moves[i][1], BLACK_PIECES[x], BLACK_PIECES, WHITE_PIECES)):
                     validmoves.append((moves[i][0], moves[i][1]))
             if((letter, number) in validmoves):
-                whiteInCheck = True
                 return True       
     else: # is black in check?
         for x in range(len(WHITE_PIECES)):
@@ -143,36 +142,8 @@ def isCheck(color, letter=-1, number=-1):
                 if(LegalMove.isSquareCapturable(moves[i][0], moves[i][1], WHITE_PIECES[x], BLACK_PIECES, WHITE_PIECES)):
                     validmoves.append((moves[i][0], moves[i][1]))
             if((letter, number) in validmoves):
-                blackInCheck = True
                 return True
     return False
-
-def getPieceAttackingKing(color):
-    King = None
-    if(color == "white"):
-        King = LegalMove.getPosKing(WHITE_PIECES)
-    else:
-        King = LegalMove.getPosKing(BLACK_PIECES)
-    listOfPieces = []
-    if(color == "white"): # is white in check?
-        for x in range(len(BLACK_PIECES)):
-            moves = BLACK_PIECES[x].returnLegalMoves()
-            validmoves = []
-            for i in range(len(moves)):
-                if(LegalMove.isValid(moves[i][0], moves[i][1], BLACK_PIECES[x], BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)):
-                    validmoves.append((moves[i][0], moves[i][1]))
-            if((King.letter, King.number) in validmoves):
-                listOfPieces.append(BLACK_PIECES[x])      
-    else: # is black in check?
-        for x in range(len(WHITE_PIECES)):
-            moves = WHITE_PIECES[x].returnLegalMoves()
-            validmoves = []
-            for i in range(len(moves)):
-                if(LegalMove.isValid(moves[i][0], moves[i][1], WHITE_PIECES[x], BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)):
-                    validmoves.append((moves[i][0], moves[i][1]))
-            if((King.letter, King.number) in validmoves):
-                listOfPieces.append(WHITE_PIECES[x])
-    return listOfPieces
 
 
 def isCheckMate(color):
@@ -188,7 +159,7 @@ def isCheckMate(color):
         if(LegalMove.isValid(moves[x][0], moves[x][1], King, BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)):
             if(not isCheck(color, moves[x][0], moves[x][1])):
                 return False
-    attackers = getPieceAttackingKing(color)
+    attackers = LegalMove.getPieceAttackingKing(color, WHITE_PIECES, BLACK_PIECES, lastPiecetoMove)
     if(len(attackers) == 1):  # Can the piece be captured? NOTE IN THIS CASE ONLY 1 PIECE IS ATTACKING KING
         if(color == "white"):
             cancapture = isCheck("black", attackers[0].letter, attackers[0].number) # is check with args passed in is actually can a piece capture at that square
@@ -217,7 +188,7 @@ def isCheckMate(color):
                     return False
 
     # King cannot move, and piece cannot be captured. Can it be blocked?
-    isBlockable = LegalMove.listofblocks(attackers, King, BLACK_PIECES, WHITE_PIECES)
+    isBlockable = LegalMove.listofblocks(attackers, King)
     if(color == "white"):
         for x in range(len(WHITE_PIECES)):
             moves = WHITE_PIECES[x].returnLegalMoves()
@@ -509,6 +480,8 @@ def main():
     global piece
     global lastPiecetoMove
     global playersMove
+    global blackInCheck
+    global whiteInCheck
     clock = pygame.time.Clock()
     InitializeGameOfChess()
     while Running:
@@ -532,7 +505,7 @@ def main():
                             if(LegalMove.isValid(moveTo[0], moveTo[1], movingPiece, BLACK_PIECES, WHITE_PIECES, lastPiecetoMove) and allow and notCheck): # Not moving on top of teammate and cannot move into check
                                 wasJust = movingPiece.letter, movingPiece.number
                                 oldPiece = LegalMove.isCapture(moveTo[0], moveTo[1], movingPiece, BLACK_PIECES, WHITE_PIECES, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
-                                attacker = getPieceAttackingKing(altcolor)
+                                attacker = LegalMove.getPieceAttackingKing(altcolor, WHITE_PIECES, BLACK_PIECES, lastPiecetoMove)
                                 if(movingPiece.__class__.__name__ == "King" and (movingPiece.letter+2) == moveTo[0]):
                                     moveRookDuringCastle(movingPiece.color, True)
                                     print("Castles")
@@ -573,7 +546,10 @@ def main():
                                                 pygame.quit()
                                                 sys.exit()
                                 elif(isCheck(color)):
+                                    blackInCheck = True
                                     print("Check")
+                                else:
+                                    blackInCheck = False
                                 piece = None 
                                 WhiteTurn = False if WhiteTurn else True 
                                 playersMove = False
@@ -583,7 +559,7 @@ def main():
         clock.tick(30)
         drawWindow()
         if(not playersMove): # Computer's move, or other player if online
-            move = ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
+            move = ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove, blackInCheck, whiteInCheck)
             move[0].move(move[1], move[2])
             LegalMove.isCapture(move[1], move[2], move[0], BLACK_PIECES, WHITE_PIECES, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
             lastPiecetoMove = move[0]
@@ -591,6 +567,11 @@ def main():
             if(promote):
                 promotedpiece = promoteGUI(lastPiecetoMove)
                 LegalMove.promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, promotedpiece)
+            if(isCheck("white")):
+                whiteInCheck = True
+                print("Check")
+            else:
+                whiteInCheck = False
             playersMove = True
             WhiteTurn = False if WhiteTurn else True 
             printEngineEval(WHITE_PIECES, BLACK_PIECES)
