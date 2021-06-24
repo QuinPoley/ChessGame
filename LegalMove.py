@@ -464,7 +464,9 @@ def isValid(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastPiecetoMov
             else:
                 king = getPosKing(BLACK_PIECES)
             allowedmoves = listofblocks(attackers, king)
-            if(not (letter, number) in allowedmoves and not movpiece.__class__.__name__ == "King"):
+            if(len(attackers) > 1 and not movpiece.__class__.__name__ == "King"): # IE two attackers, you cannot capture both in one turn or block both, so king has to move.
+                return False
+            if(not (letter, number) in allowedmoves and not movpiece.__class__.__name__ == "King" and not letter == attackers[0].letter and not number == attackers[0].number): # Moving to block, moving king, or capturing attacking piece
                 return False
             # letter and number must be in list of blocks. OR movpiece must be king.
     if(movpiece.color == "white"):
@@ -549,3 +551,14 @@ def isValidforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES): # TODO
             if(BLACK_PIECES[x].letter == letter and BLACK_PIECES[x].number == number):
                 return False
     return LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
+
+def listofPiecesCapableOfBlock(listofblocks, pieces):
+    #Do any of these pieces have a move in listofblocks, if so return their index in an array.
+    indexes = []
+    for x in range(len(pieces)):
+        possiblemoves = pieces[x].returnLegalMoves()
+        for i in range(len(possiblemoves)):
+            if((possiblemoves[i][0], possiblemoves[i][1]) in listofblocks):
+                indexes.append(x)
+                continue
+    return indexes
