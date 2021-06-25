@@ -2,7 +2,6 @@ import pygame
 import sys
 from pygame.constants import QUIT
 from pygame.draw import rect
-from pygame.scrap import contains
 from pieces import *
 import LegalMove
 import ai
