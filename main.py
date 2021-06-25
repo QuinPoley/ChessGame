@@ -36,6 +36,7 @@ whiteInCheck = False
 blackInCheck = False
 playerIsWhite = True
 playersMove = playerIsWhite
+moveNumber = 0
 
 #   SPRITES     #
 wKing = pygame.image.load("Images/WhiteKing.png")
@@ -481,6 +482,7 @@ def main():
     global playersMove
     global blackInCheck
     global whiteInCheck
+    global moveNumber
     clock = pygame.time.Clock()
     InitializeGameOfChess()
     while Running:
@@ -553,12 +555,13 @@ def main():
                                 WhiteTurn = False if WhiteTurn else True 
                                 playersMove = False
                                 printEngineEval(WHITE_PIECES, BLACK_PIECES)
+                                moveNumber += 1
                     
                         
         clock.tick(30)
         drawWindow()
         if(not playersMove): # Computer's move, or other player if online
-            move = ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove, blackInCheck, whiteInCheck)
+            move = ai.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove, blackInCheck, whiteInCheck, moveNumber)
             move[0].move(move[1], move[2])
             LegalMove.isCapture(move[1], move[2], move[0], BLACK_PIECES, WHITE_PIECES, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
             lastPiecetoMove = move[0]

@@ -562,3 +562,9 @@ def listofPiecesCapableOfBlock(listofblocks, pieces):
                 indexes.append(x)
                 continue
     return indexes
+
+def getPieceAtSquare(letter, number, pieces):
+    for x in range(len(pieces)):
+        if(letter == pieces[x].letter and number == pieces[x].number):
+            return pieces[x]
+    return None

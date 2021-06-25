@@ -2,7 +2,7 @@
 import random
 import LegalMove
 
-def move(white, black, computerisblack, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove, blackcheck, whitecheck):
+def move(white, black, computerisblack, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove, blackcheck, whitecheck, moveNumber):
     if(computerisblack):
         while True:
             piece = None
@@ -21,9 +21,26 @@ def move(white, black, computerisblack, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PI
                     piece = black[pieceindex]
                 # Select king or a piece that can block
             else:
-                index = random.randint(0, len(black)-1) # Attempted Piece to move
-                piece = black[index]
-            attmoves = piece.returnLegalMoves()
+                if(moveNumber <= 2):      # PieceAT to 
+                    kingsPawn = [(5,7), (5,5), (2,8), (3,6)]
+                    QueensPawn = [(4,7), (4,5), (5,7), (5,6)]
+                    Sicilian = [(3,7), (3,5), (4,7), (4,6)]
+                    French = [(5,7), (5,6), (4,7), (4,5)] 
+                    CaroKann = [(3,7), (3,6), (4,7), (4,5)]
+                    listofOpenings = []
+                    listofOpenings.append(kingsPawn)
+                    listofOpenings.append(QueensPawn)
+                    listofOpenings.append(Sicilian)
+                    listofOpenings.append(French)
+                    listofOpenings.append(CaroKann)
+                    whichone = random.randint(0, len(listofOpenings)-1)
+
+                    piece = LegalMove.getPieceAtSquare(listofOpenings[whichone][((moveNumber-1)*2)][0], listofOpenings[whichone][((moveNumber-1)*2)][1], black)
+                    return [piece, listofOpenings[whichone][1+((moveNumber-1)*2)][0], listofOpenings[whichone][1+((moveNumber-1)*2)][1]]
+                else:
+                    index = random.randint(0, len(black)-1) # Attempted Piece to move
+                    piece = black[index]
+                    attmoves = piece.returnLegalMoves()
             
             if((len(attmoves) > 0)):
                 wasJust = piece.letter, piece.number
