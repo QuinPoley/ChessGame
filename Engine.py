@@ -74,27 +74,27 @@ def Eval(white, black):
         moves = black[x].returnLegalMoves()
         if(black[x].__class__.__name__ == "King"):
             for i in range(len(moves)):
-                if(not moves[i] in listBlack and LegalMove.LegalforKing(moves[i][0], moves[i][1], white[x], black, white)):
+                if(not moves[i] in listBlack and LegalMove.LegalforKing(moves[i][0], moves[i][1], black[x], black, white)):
                     listBlack.append((moves[i][0], moves[i][1]))  
         elif(black[x].__class__.__name__ == "Queen"):
             for i in range(len(moves)):
-                if(not moves[i] in listBlack and LegalMove.LegalforQueen(moves[i][0], moves[i][1], white[x], black, white)):
+                if(not moves[i] in listBlack and LegalMove.LegalforQueen(moves[i][0], moves[i][1], black[x], black, white)):
                     listBlack.append((moves[i][0], moves[i][1]))
         elif(black[x].__class__.__name__ == "Rook"):
             for i in range(len(moves)):
-                if(not moves[i] in listBlack and LegalMove.LegalforRook(moves[i][0], moves[i][1], white[x], black, white)):
+                if(not moves[i] in listBlack and LegalMove.LegalforRook(moves[i][0], moves[i][1], black[x], black, white)):
                     listBlack.append((moves[i][0], moves[i][1]))
         elif(black[x].__class__.__name__ == "Bishop"):
             for i in range(len(moves)):
-                if(not moves[i] in listBlack and LegalMove.LegalforBishop(moves[i][0], moves[i][1], white[x], black, white)):
+                if(not moves[i] in listBlack and LegalMove.LegalforBishop(moves[i][0], moves[i][1], black[x], black, white)):
                     listBlack.append((moves[i][0], moves[i][1]))
         elif(black[x].__class__.__name__ == "Knight"):
             for i in range(len(moves)):
-                if(not moves[i] in listBlack and LegalMove.LegalforKnight(moves[i][0], moves[i][1], white[x], black, white)):
+                if(not moves[i] in listBlack and LegalMove.LegalforKnight(moves[i][0], moves[i][1], black[x], black, white)):
                     listBlack.append((moves[i][0], moves[i][1]))
         elif(black[x].__class__.__name__ == "Pawn"):
             for i in range(len(moves)):
-                if(not moves[i] in listBlack and LegalMove.LegalforPawnCheck(moves[i][0], moves[i][1], white[x], black, white)):
+                if(not moves[i] in listBlack and LegalMove.LegalforPawnCheck(moves[i][0], moves[i][1], black[x], black, white)):
                     listBlack.append((moves[i][0], moves[i][1]))
         # Do a ratio of who has control ie can capture over more squares
 
