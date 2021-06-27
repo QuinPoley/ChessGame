@@ -530,11 +530,6 @@ def main():
                                         break
                                 #clicked_piece.clear()
                                 print(movingPiece.color + movingPiece.__class__.__name__ + " @"+ chr(wasJust[0]+96) +","+str(wasJust[1]) +" to "+chr(moveTo[0]+96)+","+str(moveTo[1]))
-                                lastPiecetoMove = movingPiece
-                                promote = LegalMove.isPawnAtFinalRank(lastPiecetoMove)
-                                if(promote):
-                                    promotedpiece = promoteGUI(lastPiecetoMove)
-                                    LegalMove.promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, promotedpiece)
                                 if(isCheckMate(color)):
                                     print("Checkmate")
                                     piece = None
@@ -552,32 +547,52 @@ def main():
                                     print("Check")
                                 else:
                                     blackInCheck = False
+                                lastPiecetoMove = movingPiece
+                                promote = LegalMove.isPawnAtFinalRank(lastPiecetoMove)
+                                if(promote):
+                                    promotedpiece = promoteGUI(lastPiecetoMove)
+                                    LegalMove.promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, promotedpiece)
                                 piece = None 
                                 WhiteTurn = False if WhiteTurn else True 
                                 playersMove = False
-                                printEngineEval(WHITE_PIECES, BLACK_PIECES)
+                                #printEngineEval(WHITE_PIECES, BLACK_PIECES)
                                 moveNumber += 1
                     
                         
         clock.tick(30)
         drawWindow()
         if(not playersMove): # Computer's move, or other player if online
+            if(isCheck("white")):
+                whiteInCheck = True
+            else:
+                whiteInCheck = False
             move = Opponent.move(WHITE_PIECES, BLACK_PIECES, playerIsWhite, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove, blackInCheck, whiteInCheck)
             move[0].move(move[1], move[2])
             LegalMove.isCapture(move[1], move[2], move[0], BLACK_PIECES, WHITE_PIECES, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove)
-            lastPiecetoMove = move[0]
-            promote = LegalMove.isPawnAtFinalRank(lastPiecetoMove)
-            if(promote):
-                promotedpiece = promoteGUI(lastPiecetoMove)
-                LegalMove.promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, promotedpiece)
+            if(isCheckMate("white")):
+                piece = None
+                drawWindow()
+                Winner = myfont.render(altcolor+" wins!", False, colorBlack)
+                WIN.blit(Winner, (350, 425))
+                pygame.display.update()
+                while(True):
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit()
             if(isCheck("white")):
                 whiteInCheck = True
                 print("Check")
             else:
                 whiteInCheck = False
+            lastPiecetoMove = move[0]
+            promote = LegalMove.isPawnAtFinalRank(lastPiecetoMove)
+            if(promote):
+                promotedpiece = promoteGUI(lastPiecetoMove)
+                LegalMove.promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, promotedpiece)
             playersMove = True
             WhiteTurn = False if WhiteTurn else True 
-            printEngineEval(WHITE_PIECES, BLACK_PIECES)
+            #printEngineEval(WHITE_PIECES, BLACK_PIECES)
 
         
     pygame.quit()
