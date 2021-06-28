@@ -428,7 +428,7 @@ def isSquareCapturable(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
         return LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES)
     return True # King legal moves like not moving into check require checks to be defined
 
-def isSafe(color, letter, number, BLACK_PIECES, WHITE_PIECES): # BUG WITH PAWNS, They cannot capture directly ahead, but it is a valid move, so the is check function returns true FIXED
+def isSafe(color, letter, number, BLACK_PIECES, WHITE_PIECES):
     if(color == "white"): # is white in check?
         for x in range(len(BLACK_PIECES)):
             moves = BLACK_PIECES[x].returnLegalMoves()
@@ -568,3 +568,44 @@ def getPieceAtSquare(letter, number, pieces):
         if(letter == pieces[x].letter and number == pieces[x].number):
             return pieces[x]
     return None
+
+def isCheckAfterMove(letter, number, piece, black, white):
+    King = None
+    if(piece.color == "white"):
+        King = getPosKing("white")
+    else:
+        King = getPosKing("black")
+    
+    # Create a deep copy of the color we are checking so we dont accidentally move a piece
+    WhitePieces = white.copy()
+    BlackPieces = black.copy()
+    pieceletter = piece.letter
+    piecenumber = piece.number
+    newpiece = None
+    if(piece.color == "white"):
+        newpiece = getPieceAtSquare(pieceletter, piecenumber, WhitePieces)
+    else:
+        newpiece = getPieceAtSquare(pieceletter, piecenumber, BlackPieces)
+
+    newpiece.letter = letter
+    newpiece.number = number
+
+    if(King.color == "white"): # is white in check?
+        for x in range(len(BlackPieces)):
+            moves = BlackPieces[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isSquareCapturable(moves[i][0], moves[i][1], BlackPieces[x], BlackPieces, WhitePieces)): # Can this piece capture this square
+                    validmoves.append((moves[i][0], moves[i][1]))
+            if((letter, number) in validmoves):
+                return True       
+    else: # is black in check?
+        for x in range(len(WhitePieces)):
+            moves = WhitePieces[x].returnLegalMoves()
+            validmoves = []
+            for i in range(len(moves)):
+                if(isSquareCapturable(moves[i][0], moves[i][1], WhitePieces[x], BlackPieces, WhitePieces)): # Can this piece capture this square
+                    validmoves.append((moves[i][0], moves[i][1]))
+        if((letter, number) in validmoves):
+            return True
+    return False

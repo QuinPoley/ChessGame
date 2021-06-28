@@ -102,8 +102,6 @@ def InitializeGameOfChess():
         else:
             WHITE_PIECES.append(King("white", x, 1))
             BLACK_PIECES.append(King("black", x, 8))
-    for x in range(16):
-        print(BLACK_PIECES[x])
 
 def popKingOffList(color):
     if(color == "white"):
@@ -124,7 +122,6 @@ def isCheck(color, letter=-1, number=-1):
             King = LegalMove.getPosKing(BLACK_PIECES)
         letter = King.letter
         number = King.number
-    #print(letter, number)
     
     if(color == "white"): # is white in check?
         for x in range(len(BLACK_PIECES)):
@@ -592,7 +589,6 @@ def main():
                 LegalMove.promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, promotedpiece)
             playersMove = True
             WhiteTurn = False if WhiteTurn else True 
-            #printEngineEval(WHITE_PIECES, BLACK_PIECES)
 
         
     pygame.quit()
