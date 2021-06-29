@@ -530,15 +530,18 @@ def isPawnAtFinalRank(lastpiece):
     return False
 
 # Call at end of turn
-def promotePawnAtEnd(BLACK_PIECES, WHITE_PIECES, changeTo):
-    for x in range(len(BLACK_PIECES)):
-        if(BLACK_PIECES[x].__class__.__name__ == "Pawn" and BLACK_PIECES[x].number == 1):
-            BLACK_PIECES.pop(x)
-            BLACK_PIECES.append(changeTo)
-    for x in range(len(WHITE_PIECES)):
-        if(WHITE_PIECES[x].__class__.__name__ == "Pawn" and WHITE_PIECES[x].number == 8):
-            WHITE_PIECES.pop(x)
-            WHITE_PIECES.append(changeTo)
+def promotePawnAtEnd(PIECES, changeTo, color):
+    for x in range(len(PIECES)):
+        if(color == "white"):
+            if(PIECES[x].__class__.__name__ == "Pawn" and PIECES[x].number == 8):
+                changeTo.color == "white"
+                PIECES.pop(x)
+                PIECES.append(changeTo)
+        else:
+            if(PIECES[x].__class__.__name__ == "Pawn" and PIECES[x].number == 1):
+                changeTo.color == "black"
+                PIECES.pop(x)
+                PIECES.append(changeTo)
 
 
 def isValidforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES): # TODO if castles - check to make sure in between square is not check
@@ -568,6 +571,18 @@ def getPieceAtSquare(letter, number, pieces):
         if(letter == pieces[x].letter and number == pieces[x].number):
             return pieces[x]
     return None
+
+def WrapperGetPieceAtSquare(letter, number, white, black):
+    whitepiece = getPieceAtSquare(letter, number, white)
+    blackpiece = getPieceAtSquare(letter, number, black)
+    if(whitepiece != None and blackpiece != None):
+        return None
+    elif(whitepiece != None):
+        return whitepiece
+    elif(blackpiece != None):
+        return blackpiece
+    else:
+        return None
 
 def isCheckAfterMove(letter, number, piece, black, white):
     King = None

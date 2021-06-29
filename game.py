@@ -12,6 +12,7 @@ class GameOfChess():
         self.MoveNumber = 0
         self.WhiteCheck = False
         self.BlackCheck = False
+        self.CurrentlySelected = None
         self.PreviouslyMovingPiece = None
         self.Checkmate = False
         self.Winner = ""
@@ -34,6 +35,22 @@ class GameOfChess():
             else:
                 self.White.append(King("white", x, 1))
                 self.Black.append(King("black", x, 8))
+
+    def LocateMouseDown(self, pos):
+        x, y = pos
+        squareX = (x //100) + 1
+        squareY = 8 - (y //100)
+        return (squareX, squareY)
+
+    def SelectPiece(self, pos):
+        squarex, squarey = self.LocateMouseDown(pos)
+        SelectedPiece = LegalMove.WrapperGetPieceAtSquare(squarex, squarey, self.White, self.Black)
+        if(SelectedPiece == None):
+            return
+        if((SelectedPiece.color == "white" and self.WhiteTurn == False) or (SelectedPiece.color == "black" and self.WhiteTurn == True)):
+            return
+
+        self.CurrentlySelected = SelectedPiece # Okay, legal selection
 
     # Is the color in check?
     def Check(self, color):
@@ -132,8 +149,32 @@ class GameOfChess():
         #    return False
         return True
 
-    def PromotePawns():
-        print("BLAH")
+    def Castle(self, color, istoRight):
+        default = 1
+        movingTo = 4
+        if(istoRight):
+            default = 8
+            movingTo = 6
+        if(color == "white"):
+            for x in range(len(self.White)):
+                if(self.White[x].number == 1 and self.White[x].letter == default):
+                    self.White[x].letter = movingTo # Move Rook to other side
+        else:
+            for x in range(len(self.Black)):
+                if(self.Black[x].number == 8 and self.Black[x].letter == default):
+                    self.Black[x].letter = movingTo # Move Rook to other side
+
+    def PromotePawns(self):
+        if(LegalMove.isPawnAtFinalRank(self.PreviouslyMovingPiece)):
+            Promotion = None
+            if(self.PreviouslyMovingPiece.color == "white"):
+                Promotion = LegalMove.getPieceAtSquare(self.PreviouslyMovingPiece.letter, self.PreviouslyMovingPiece.number, self.White)
+                LegalMove.promotePawnAtEnd(self.White, Queen("", Promotion.letter, Promotion.number), "white")
+            else:
+                Promotion = LegalMove.getPieceAtSquare(self.PreviouslyMovingPiece.letter, self.PreviouslyMovingPiece.number, self.Black)
+                LegalMove.promotePawnAtEnd(self.White, Queen("", Promotion.letter, Promotion.number), "white")
+
+           
 
     # True if valid move completed
     # False otherwise
