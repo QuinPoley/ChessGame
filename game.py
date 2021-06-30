@@ -46,11 +46,12 @@ class GameOfChess():
         squarex, squarey = self.LocateMouseDown(pos)
         SelectedPiece = LegalMove.WrapperGetPieceAtSquare(squarex, squarey, self.White, self.Black)
         if(SelectedPiece == None):
-            return
+            return False
         if((SelectedPiece.color == "white" and self.WhiteTurn == False) or (SelectedPiece.color == "black" and self.WhiteTurn == True)):
-            return
+            return False
 
         self.CurrentlySelected = SelectedPiece # Okay, legal selection
+        return True # We did select a piece
 
     # Is the color in check?
     def Check(self, color):
@@ -174,11 +175,22 @@ class GameOfChess():
                 Promotion = LegalMove.getPieceAtSquare(self.PreviouslyMovingPiece.letter, self.PreviouslyMovingPiece.number, self.Black)
                 LegalMove.promotePawnAtEnd(self.White, Queen("", Promotion.letter, Promotion.number), "white")
 
-           
+    def Capture(self):
+        if(self.CurrentlySelected.color == "white"):
+            maybe = LegalMove.getPieceAtSquare(self.CurrentlySelected.letter, self.CurrentlySelected.number, self.Black)
+            if(maybe != None):
+                return True
+        else:
+            maybe = LegalMove.getPieceAtSquare(self.CurrentlySelected.letter, self.CurrentlySelected.number, self.White)
+            if(maybe != None):
+                return True
+        return False
 
     # True if valid move completed
     # False otherwise
-    def MovePiece(self, Piece, Location):
+    def MovePiece(self, MouseLocation):
+        Piece = self.CurrentlySelected
+        Location = self.LocateMouseDown(MouseLocation)
         if((self.WhiteTurn and Piece.color == "black") or (not self.WhiteTurn and Piece.color == "white") or Piece == None):
             return False # Not your turn or no piece
         
@@ -191,22 +203,23 @@ class GameOfChess():
         else: # Not in check
             if(LegalMove.isValid(Location[0], Location[1], Piece, self.Black, self.White, self.PreviouslyMovingPiece, self.BlackCheck, self.WhiteCheck) and not LegalMove.isCheckAfterMove(Location[0], Location[1], Piece, self.Black, self.White)): # Move Valid
                 Piece.move(Location[0], Location[1]) # Because the move is valid, does not cause check, and we were not in check
-                LegalMove.isCapture(Location[0], Location[1], Piece, self.Black, self.White, self.CapturedBlack, self.CapturedWhite, self.PreviouslyMovingPiece)
-                # Eventually I want to remove the piece here, and iscapture should just return true or false
-                #if(LegalMove.isCapture()):
-                #    if(Piece.color == "white"):
-                #        LegalMove.getPieceAtSquare(Location[0], Location[1])
-                
-
-        # IS IT CHECKMATE???
+                if(self.Capture()):
+                    if(self.CurrentlySelected.color == "white"):
+                        capturedpiece = LegalMove.getPieceAtSquare(Location[0], Location[1], self.Black)
+                        self.Black.remove(capturedpiece)
+                        self.CapturedBlack.append(capturedpiece)
+                    else:
+                        capturedpiece = LegalMove.getPieceAtSquare(Location[0], Location[1], self.White)
+                        self.White.remove(capturedpiece)
+                        self.CapturedWhite.append(capturedpiece)
         color = "black" if self.WhiteTurn else "white" # Color not moving
-        if(self.CheckMate(color)):
-            self.Checkmate = True
-            self.Winner = Piece.color
-
+        #if(self.CheckMate(color)):
+        #    self.Checkmate = True
+        #    self.Winner = Piece.color
         self.WhiteCheck = self.Check("white")
         self.BlackCheck = self.Check("black")
         self.PreviouslyMovingPiece = Piece
         self.PromotePawns()
         self.WhiteTurn = False if self.WhiteTurn else True # Flip turn
         self.MoveNumber += 1
+        self.CurrentlySelected = None

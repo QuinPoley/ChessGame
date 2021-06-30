@@ -587,9 +587,9 @@ def WrapperGetPieceAtSquare(letter, number, white, black):
 def isCheckAfterMove(letter, number, piece, black, white):
     King = None
     if(piece.color == "white"):
-        King = getPosKing("white")
+        King = getPosKing(white)
     else:
-        King = getPosKing("black")
+        King = getPosKing(black)
     
     # Create a deep copy of the color we are checking so we dont accidentally move a piece
     WhitePieces = white.copy()

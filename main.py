@@ -278,8 +278,10 @@ def main():
             if event.type == pygame.QUIT:
                 Running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                game.SelectPiece(pygame.mouse.get_pos())
+                selected = game.SelectPiece(pygame.mouse.get_pos())
                 # Okay maybe trying to move
+                if(game.CurrentlySelected != None and not selected): # We didnt select a piece with that mousedown, and we have a piece selected
+                    game.MovePiece(pygame.mouse.get_pos())
 
         clock.tick(30)
         drawWindow(game)
