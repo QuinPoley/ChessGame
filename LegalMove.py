@@ -1,6 +1,9 @@
+import copy
 def LegalforPawn(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastpiece):
     # DIAGONAL MOVE CHECK
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
+        return False
+    if(not (letter, number) in movpiece.returnLegalMoves()):
         return False
     if(movpiece.color == "white" and movpiece.letter != letter): # white pawn moving diagonally
             for x in range(len(BLACK_PIECES)):
@@ -56,6 +59,8 @@ def LegalforQueen(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     numberMovesX = abs(letter - movpiece.letter)
     numberMovesY = abs(number - movpiece.number)
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
+        return False
+    if(not (letter, number) in movpiece.returnLegalMoves()):
         return False
     if(numberMovesX == 0): # Staying in same column, check if theres a piece between queen and desired square
         if(number > movpiece.number): # Moving up the grid, add
@@ -144,6 +149,8 @@ def LegalforRook(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     numberMovesY = abs(number - movpiece.number)
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
         return False
+    if(not (letter, number) in movpiece.returnLegalMoves()):
+        return False
     if(numberMovesX == 0): # Staying in same column, check if theres a piece between queen and desired square
         if(number > movpiece.number): # Moving up the grid, add
             for x in range(1, numberMovesY):
@@ -193,6 +200,8 @@ def LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     numberMovesY = abs(number - movpiece.number)
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
         return False
+    if(not (letter, number) in movpiece.returnLegalMoves()):
+        return False
     if(numberMovesX != numberMovesX):
         return False
     if(number > movpiece.number): # Moving up the grid, add
@@ -235,12 +244,15 @@ def LegalforBishop(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
 def LegalforKnight(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
         return False
+    if(not (letter, number) in movpiece.returnLegalMoves()):
+        return False
     return True # Can jump over stuff, so this is pretty much always true
 
 def LegalforKing(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES):
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
         return False
-
+    if(not (letter, number) in movpiece.returnLegalMoves()):
+        return False
     if(letter == (movpiece.letter+2)):  # Trying to castle
         rook = None
         king = None
@@ -356,6 +368,8 @@ def LegalforPawnCheck(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES): # B
     # DIAGONAL MOVE CHECK
     if((letter < 1 or letter > 8) or (number < 1 or number > 8)):
         return False
+    if(not (letter, number) in movpiece.returnLegalMoves()):
+        return False
     if(movpiece.color == "white" and movpiece.letter != letter): # white pawn moving diagonally
             return True
     elif(movpiece.color == "black" and movpiece.letter != letter):
@@ -464,6 +478,8 @@ def isValid(letter, number, movpiece, BLACK_PIECES, WHITE_PIECES, lastPiecetoMov
             else:
                 king = getPosKing(BLACK_PIECES)
             allowedmoves = listofblocks(attackers, king)
+            if(len(attackers) < 2):
+                allowedmoves.append((attackers[0].letter, attackers[0].number))
             if(len(attackers) > 1 and not movpiece.__class__.__name__ == "King"): # IE two attackers, you cannot capture both in one turn or block both, so king has to move.
                 return False
             if(not (letter, number) in allowedmoves and not movpiece.__class__.__name__ == "King" and not letter == attackers[0].letter and not number == attackers[0].number): # Moving to block, moving king, or capturing attacking piece
@@ -585,15 +601,15 @@ def WrapperGetPieceAtSquare(letter, number, white, black):
         return None
 
 def isCheckAfterMove(letter, number, piece, black, white):
+    # Create a deep copy of the color we are checking so we dont accidentally move a piece
+    WhitePieces = copy.deepcopy(white)
+    BlackPieces = copy.deepcopy(black)
     King = None
     if(piece.color == "white"):
-        King = getPosKing(white)
+        King = getPosKing(WhitePieces)
     else:
-        King = getPosKing(black)
-    
-    # Create a deep copy of the color we are checking so we dont accidentally move a piece
-    WhitePieces = white.copy()
-    BlackPieces = black.copy()
+        King = getPosKing(BlackPieces)
+
     pieceletter = piece.letter
     piecenumber = piece.number
     newpiece = None
@@ -604,23 +620,32 @@ def isCheckAfterMove(letter, number, piece, black, white):
 
     newpiece.letter = letter
     newpiece.number = number
+    CapturedPiece = None
+    if(newpiece.color == "white"):
+        CapturedPiece = getPieceAtSquare(letter, number, BlackPieces)
+    else:
+        CapturedPiece = getPieceAtSquare(letter, number, WhitePieces)
 
+    if(newpiece.color == "white" and CapturedPiece != None):
+        BlackPieces.remove(CapturedPiece)
+    if(newpiece.color == "black" and CapturedPiece != None):
+        WhitePieces.remove(CapturedPiece)
+
+    validmoves = []
     if(King.color == "white"): # is white in check?
         for x in range(len(BlackPieces)):
             moves = BlackPieces[x].returnLegalMoves()
-            validmoves = []
             for i in range(len(moves)):
                 if(isSquareCapturable(moves[i][0], moves[i][1], BlackPieces[x], BlackPieces, WhitePieces)): # Can this piece capture this square
                     validmoves.append((moves[i][0], moves[i][1]))
-            if((letter, number) in validmoves):
+            if((King.letter, King.number) in validmoves):
                 return True       
     else: # is black in check?
         for x in range(len(WhitePieces)):
             moves = WhitePieces[x].returnLegalMoves()
-            validmoves = []
             for i in range(len(moves)):
                 if(isSquareCapturable(moves[i][0], moves[i][1], WhitePieces[x], BlackPieces, WhitePieces)): # Can this piece capture this square
                     validmoves.append((moves[i][0], moves[i][1]))
-        if((letter, number) in validmoves):
+        if((King.letter, King.number) in validmoves):
             return True
     return False

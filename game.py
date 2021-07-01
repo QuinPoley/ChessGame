@@ -198,7 +198,43 @@ class GameOfChess():
         self.BlackCheck = self.Check("black")
 
         if((self.WhiteTurn and self.WhiteCheck) or (not self.WhiteTurn and self.BlackCheck)):
-            print() # In check, lets limit moves to those that block or get out of check
+            MovesToGetOutOfCheck = []
+            if(self.WhiteCheck):
+                attacking = LegalMove.getPieceAttackingKing("white", self.White, self.Black, self.PreviouslyMovingPiece)
+                king = LegalMove.getPosKing(self.White)
+                MovesToGetOutOfCheck = LegalMove.listofblocks(attacking, king)
+                if(len(attacking) < 2):
+                    MovesToGetOutOfCheck.append((attacking[0].letter, attacking[0].number))
+            else:
+                attacking = LegalMove.getPieceAttackingKing("black", self.White, self.Black, self.PreviouslyMovingPiece)
+                king = LegalMove.getPosKing(self.Black)
+                MovesToGetOutOfCheck = LegalMove.listofblocks(attacking, king)
+                if(len(attacking) < 2):
+                    MovesToGetOutOfCheck.append((attacking[0].letter, attacking[0].number))
+            # Piece moving to block or capture or king moving away or to capture
+            if(Location in MovesToGetOutOfCheck or self.CurrentlySelected.__class__.__name__ == "King"):
+                if(LegalMove.isValid(Location[0], Location[1], Piece, self.Black, self.White, self.PreviouslyMovingPiece, self.BlackCheck, self.WhiteCheck) and not LegalMove.isCheckAfterMove(Location[0], Location[1], Piece, self.Black, self.White)):
+                    Piece.move(Location[0], Location[1])
+                    if(self.Capture()):
+                        if(self.CurrentlySelected.color == "white"):
+                            capturedpiece = LegalMove.getPieceAtSquare(Location[0], Location[1], self.Black)
+                            self.Black.remove(capturedpiece)
+                            self.CapturedBlack.append(capturedpiece)
+                        else:
+                            capturedpiece = LegalMove.getPieceAtSquare(Location[0], Location[1], self.White)
+                            self.White.remove(capturedpiece)
+                            self.CapturedWhite.append(capturedpiece)
+                    color = "black" if self.WhiteTurn else "white" # Color not moving
+                    #if(self.CheckMate(color)):
+                    #    self.Checkmate = True
+                    #    self.Winner = Piece.color
+                    self.WhiteCheck = self.Check("white")
+                    self.BlackCheck = self.Check("black")
+                    self.PreviouslyMovingPiece = Piece
+                    self.PromotePawns()
+                    self.WhiteTurn = False if self.WhiteTurn else True # Flip turn
+                    self.MoveNumber += 1
+                    self.CurrentlySelected = None
 
         else: # Not in check
             if(LegalMove.isValid(Location[0], Location[1], Piece, self.Black, self.White, self.PreviouslyMovingPiece, self.BlackCheck, self.WhiteCheck) and not LegalMove.isCheckAfterMove(Location[0], Location[1], Piece, self.Black, self.White)): # Move Valid
@@ -212,14 +248,14 @@ class GameOfChess():
                         capturedpiece = LegalMove.getPieceAtSquare(Location[0], Location[1], self.White)
                         self.White.remove(capturedpiece)
                         self.CapturedWhite.append(capturedpiece)
-        color = "black" if self.WhiteTurn else "white" # Color not moving
-        #if(self.CheckMate(color)):
-        #    self.Checkmate = True
-        #    self.Winner = Piece.color
-        self.WhiteCheck = self.Check("white")
-        self.BlackCheck = self.Check("black")
-        self.PreviouslyMovingPiece = Piece
-        self.PromotePawns()
-        self.WhiteTurn = False if self.WhiteTurn else True # Flip turn
-        self.MoveNumber += 1
-        self.CurrentlySelected = None
+                color = "black" if self.WhiteTurn else "white" # Color not moving
+                #if(self.CheckMate(color)):
+                #    self.Checkmate = True
+                #    self.Winner = Piece.color
+                self.WhiteCheck = self.Check("white")
+                self.BlackCheck = self.Check("black")
+                self.PreviouslyMovingPiece = Piece
+                self.PromotePawns()
+                self.WhiteTurn = False if self.WhiteTurn else True # Flip turn
+                self.MoveNumber += 1
+                self.CurrentlySelected = None
