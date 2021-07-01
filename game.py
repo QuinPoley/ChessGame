@@ -83,7 +83,7 @@ class GameOfChess():
                     return True
         return False
 
-    def isCheckMate(self, color):
+    def CheckMate(self, color):
         if(not self.Check(color)):
             return False
         King = None
@@ -93,32 +93,34 @@ class GameOfChess():
             King = LegalMove.getPosKing(self.Black)
         moves = King.returnLegalMoves()
         for x in range(len(moves)):
-            if(LegalMove.isValid(moves[x][0], moves[x][1], King, BLACK_PIECES, self.White, self.PreviouslyMovingPiece)):
-                if(not isCheck(color, moves[x][0], moves[x][1])):
+            if(LegalMove.isValid(moves[x][0], moves[x][1], King, self.Black, self.White, self.PreviouslyMovingPiece)):
+                if(not LegalMove.isSafe(color, moves[x][0], moves[x][1], self.Black, self.White)):
                     return False
-        attackers = LegalMove.getPieceAttackingKing(color, self.White, BLACK_PIECES, self.PreviouslyMovingPiece)
+        attackers = LegalMove.getPieceAttackingKing(color, self.White, self.Black, self.PreviouslyMovingPiece)
         if(len(attackers) == 1):  # Can the piece be captured? NOTE IN THIS CASE ONLY 1 PIECE IS ATTACKING KING
             if(color == "white"):
-                cancapture = isCheck("black", attackers[0].letter, attackers[0].number) # is check with args passed in is actually can a piece capture at that square
+                cancapture = LegalMove.isSafe("black", attackers[0].letter, attackers[0].number, self.Black, self.White) # is check with args passed in is actually can a piece capture at that square
                 if(cancapture):  # MAY STILL BE TRUE, IF MOVING CAPTURING PIECE CAUSES CHECK OR IF PIECE IS DEFENDED
-                    isdefended = isCheck("white", attackers[0].letter, attackers[0].letter) # Is the piece defended?
+                    isdefended = LegalMove.isSafe("white", attackers[0].letter, attackers[0].letter, self.Black, self.White) # Is the piece defended?
                     if(isdefended):
-                        king = popKingOffList("white") # can it be captured by some piece that is not the king?
-                        canstillcapture = isCheck("black", attackers[0].letter, attackers[0].number)
-                        WHITE_PIECES.append(king) # Need to put king back on list
+                        king = LegalMove.getPosKing(self.White) # can it be captured by some piece that is not the king?
+                        self.White.remove(king)
+                        canstillcapture = LegalMove.isSafe("black", attackers[0].letter, attackers[0].number, self.Black, self.White)
+                        self.White.append(king) # Need to put king back on list
                         if(canstillcapture): 
                             return False
                     else:
                         return False
                     
             else:
-                cancapture = isCheck("white", attackers[0].letter, attackers[0].number) # is check with args passed in is actually can a piece capture at that square
+                cancapture = LegalMove.isSafe("white", attackers[0].letter, attackers[0].number, self.Black, self.White) # is check with args passed in is actually can a piece capture at that square
                 if(cancapture):
-                    isdefended = isCheck("black", attackers[0].letter, attackers[0].letter) # Is the piece defended?
+                    isdefended = LegalMove.isSafe("black", attackers[0].letter, attackers[0].letter, self.Black, self.White) # Is the piece defended?
                     if(isdefended):
-                        king = popKingOffList("black") # can it be captured by some piece that is not the king?
-                        canstillcapture = isCheck("white", attackers[0].letter, attackers[0].number)
-                        BLACK_PIECES.append(king) # Need to put king back on list
+                        king = LegalMove.getPosKing(self.Black) # can it be captured by some piece that is not the king?
+                        self.Black.remove(king)
+                        canstillcapture = LegalMove.isSafe("white", attackers[0].letter, attackers[0].number, self.Black, self.White)
+                        self.Black.append(king) # Need to put king back on list
                         if(canstillcapture):
                             return False
                     else:
@@ -126,21 +128,21 @@ class GameOfChess():
         # King cannot move, and piece cannot be captured. Can it be blocked?
         isBlockable = LegalMove.listofblocks(attackers, King)
         if(color == "white"):
-            for x in range(len(WHITE_PIECES)):
-                moves = WHITE_PIECES[x].returnLegalMoves()
+            for x in range(len(self.White)):
+                moves = self.White[x].returnLegalMoves()
                 validmoves = []
                 for i in range(len(moves)):
-                    if(LegalMove.isValid(moves[i][0], moves[i][1], WHITE_PIECES[x], BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)):
+                    if(LegalMove.isValid(moves[i][0], moves[i][1], self.White[x], self.Black, self.White, self.PreviouslyMovingPiece)):
                         validmoves.append((moves[i][0], moves[i][1]))
                 for i in range(len(isBlockable)):
                     if(isBlockable[i] in validmoves): # There is a valid move that blocks the check
                         return False
         else:
-            for x in range(len(BLACK_PIECES)):
-                moves = BLACK_PIECES[x].returnLegalMoves()
+            for x in range(len(self.Black)):
+                moves = self.Black[x].returnLegalMoves()
                 validmoves = []
                 for i in range(len(moves)):
-                    if(LegalMove.isValid(moves[i][0], moves[i][1], BLACK_PIECES[x], BLACK_PIECES, WHITE_PIECES, lastPiecetoMove)):
+                    if(LegalMove.isValid(moves[i][0], moves[i][1], self.Black[x], self.Black, self.White, self.PreviouslyMovingPiece)):
                         validmoves.append((moves[i][0], moves[i][1]))
                 for i in range(len(isBlockable)):
                     if(isBlockable[i] in validmoves): # There is a valid move that blocks the check
@@ -238,6 +240,11 @@ class GameOfChess():
 
         else: # Not in check
             if(LegalMove.isValid(Location[0], Location[1], Piece, self.Black, self.White, self.PreviouslyMovingPiece, self.BlackCheck, self.WhiteCheck) and not LegalMove.isCheckAfterMove(Location[0], Location[1], Piece, self.Black, self.White)): # Move Valid
+                if(Piece.__class__.__name__ == "King" and abs(Location[0] - Piece.letter) == 2):
+                    if((Location[0] - Piece.letter) > 0):
+                        self.Castle(Piece.color, True)
+                    else:
+                        self.Castle(Piece.color, False)
                 Piece.move(Location[0], Location[1]) # Because the move is valid, does not cause check, and we were not in check
                 if(self.Capture()):
                     if(self.CurrentlySelected.color == "white"):
@@ -249,9 +256,9 @@ class GameOfChess():
                         self.White.remove(capturedpiece)
                         self.CapturedWhite.append(capturedpiece)
                 color = "black" if self.WhiteTurn else "white" # Color not moving
-                #if(self.CheckMate(color)):
-                #    self.Checkmate = True
-                #    self.Winner = Piece.color
+                if(self.CheckMate(color)):
+                    self.Checkmate = True
+                    self.Winner = Piece.color
                 self.WhiteCheck = self.Check("white")
                 self.BlackCheck = self.Check("black")
                 self.PreviouslyMovingPiece = Piece
