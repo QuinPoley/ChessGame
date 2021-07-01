@@ -92,7 +92,7 @@ def drawChessBoard(game):
         # valid moves too
         ValidMoveSet = game.CurrentlySelected.returnLegalMoves()
         for x in range(len(ValidMoveSet)):
-            if(LegalMove.isValid(ValidMoveSet[x][0], ValidMoveSet[x][1], game.CurrentlySelected, game.Black, game.White, game.PreviouslyMovingPiece)):
+            if(LegalMove.isValid(ValidMoveSet[x][0], ValidMoveSet[x][1], game.CurrentlySelected, game.Black, game.White, game.PreviouslyMovingPiece) and not LegalMove.isCheckAfterMove(ValidMoveSet[x][0], ValidMoveSet[x][1], game.CurrentlySelected, game.Black, game.White)):
                 validmovX = (ValidMoveSet[x][0] * 100) - 100
                 validmovY = 800 - (ValidMoveSet[x][1] * 100)
                 if((validmovX //100) % 2 == 0):
