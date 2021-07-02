@@ -649,3 +649,61 @@ def isCheckAfterMove(letter, number, piece, black, white):
         if((King.letter, King.number) in validmoves):
             return True
     return False
+
+def GenerateAllMoves(self, white, black):
+    listWhite = []
+    listBlack = []
+    for x in range(len(white)):
+        moves = white[x].returnLegalMoves()
+        if(white[x].__class__.__name__ == "King"):
+            for i in range(len(moves)):
+                if(not moves[i] in listWhite and LegalforKing(moves[i][0], moves[i][1], white[x], black, white)):
+                    listWhite.append((moves[i][0], moves[i][1]))  
+        elif(white[x].__class__.__name__ == "Queen"):
+            for i in range(len(moves)):
+                if(not moves[i] in listWhite and LegalforQueen(moves[i][0], moves[i][1], white[x], black, white)):
+                    listWhite.append((moves[i][0], moves[i][1]))
+        elif(white[x].__class__.__name__ == "Rook"):
+            for i in range(len(moves)):
+                if(not moves[i] in listWhite and LegalforRook(moves[i][0], moves[i][1], white[x], black, white)):
+                    listWhite.append((moves[i][0], moves[i][1]))
+        elif(white[x].__class__.__name__ == "Bishop"):
+            for i in range(len(moves)):
+                if(not moves[i] in listWhite and LegalforBishop(moves[i][0], moves[i][1], white[x], black, white)):
+                    listWhite.append((moves[i][0], moves[i][1]))
+        elif(white[x].__class__.__name__ == "Knight"):
+            for i in range(len(moves)):
+                if(not moves[i] in listWhite and LegalforKnight(moves[i][0], moves[i][1], white[x], black, white)):
+                    listWhite.append((moves[i][0], moves[i][1]))
+        elif(white[x].__class__.__name__ == "Pawn"):
+            for i in range(len(moves)):
+                if(not moves[i] in listWhite and LegalforPawnCheck(moves[i][0], moves[i][1], white[x], black, white)):
+                    listWhite.append((moves[i][0], moves[i][1]))
+    
+    for x in range(len(black)):
+        moves = black[x].returnLegalMoves()
+        if(black[x].__class__.__name__ == "King"):
+            for i in range(len(moves)):
+                if(not moves[i] in listBlack and LegalforKing(moves[i][0], moves[i][1], black[x], black, white)):
+                    listBlack.append((moves[i][0], moves[i][1]))  
+        elif(black[x].__class__.__name__ == "Queen"):
+            for i in range(len(moves)):
+                if(not moves[i] in listBlack and LegalforQueen(moves[i][0], moves[i][1], black[x], black, white)):
+                    listBlack.append((moves[i][0], moves[i][1]))
+        elif(black[x].__class__.__name__ == "Rook"):
+            for i in range(len(moves)):
+                if(not moves[i] in listBlack and LegalforRook(moves[i][0], moves[i][1], black[x], black, white)):
+                    listBlack.append((moves[i][0], moves[i][1]))
+        elif(black[x].__class__.__name__ == "Bishop"):
+            for i in range(len(moves)):
+                if(not moves[i] in listBlack and LegalforBishop(moves[i][0], moves[i][1], black[x], black, white)):
+                    listBlack.append((moves[i][0], moves[i][1]))
+        elif(black[x].__class__.__name__ == "Knight"):
+            for i in range(len(moves)):
+                if(not moves[i] in listBlack and LegalforKnight(moves[i][0], moves[i][1], black[x], black, white)):
+                    listBlack.append((moves[i][0], moves[i][1]))
+        elif(black[x].__class__.__name__ == "Pawn"):
+            for i in range(len(moves)):
+                if(not moves[i] in listBlack and LegalforPawnCheck(moves[i][0], moves[i][1], black[x], black, white)):
+                    listBlack.append((moves[i][0], moves[i][1]))
+    return [listWhite, listBlack]

@@ -2,6 +2,7 @@
 import random
 import LegalMove
 import Engine
+import copy
 
 class ComputerOpponent:
     def __init__(self):
@@ -20,8 +21,23 @@ class ComputerOpponent:
         self.selectedopening = random.randint(0, len(listofOpenings)-1)
         self.listofOpenings = listofOpenings
 
+    def EvaluateBoard(self, white, black):
+        # Take the engine eval and simplfy it to one number how good is it for me
+        WhiteMat, BlackMat, Control, WhiteSafe, BlackSafe = Engine.Eval(white, black)
+        BoardState = ((BlackMat - WhiteMat) * 3) + Control + ((BlackSafe - WhiteSafe) * 2) - 1  # Default 0 More is great, less is bad
+        return BoardState
 
-    def move(self, white, black, computerisblack, CAPTURED_BLACK_PIECES, CAPTURED_WHITE_PIECES, lastPiecetoMove, blackcheck, whitecheck):
+    def FindBestMove(self, white, black):
+        CopyWhite = copy.deepcopy(white)
+        CopyBlack = copy.deepcopy(black)
+        AllWhiteMoves, AllBlackMoves = LegalMove.GenerateAllMoves(CopyWhite, CopyBlack)
+        BestState = -1000 # Real bad for us
+        for x in range(AllBlackMoves):
+            print()
+        # Use EvaluateBoard to do my bad minimax implementation
+        print()
+
+    def move(self, white, black, computerisblack, lastPiecetoMove, blackcheck, whitecheck):
         if(computerisblack):
             self.moveNumber += 1
             blackAttemptedMove = black.copy()
@@ -60,8 +76,6 @@ class ComputerOpponent:
                                     blackAttemptedMove[x].move(legalmoves[i][0], legalmoves[i][1])
                                     values = Engine.Eval(white, blackAttemptedMove)
                                     file.write(str(blackAttemptedMove[x]) + " "+ str(legalmoves[i][0]) + ","+  str(legalmoves[i][1]) + " "+ str(values[0]) + " " + str(WhiteMaterialLeft) + " " + str(values[2]) + " " +  str(RatioOfSquaresControlled)+"\n")
-                                    print(values[0] >= WhiteMaterialLeft)
-                                    print(values[2] <= RatioOfSquaresControlled)
                                     if(values[0] >= WhiteMaterialLeft and values[2] <= RatioOfSquaresControlled): # Check if its the best move so far
                                         BestMove = [(blackAttemptedMove[x].letter, blackAttemptedMove[x].number), wasJust]
                                         WhiteMaterialLeft = values[0]

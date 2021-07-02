@@ -278,11 +278,19 @@ def main():
             if event.type == pygame.QUIT:
                 Running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                selected = game.SelectPiece(pygame.mouse.get_pos())
-                # Okay maybe trying to move
-                if(game.CurrentlySelected != None and not selected): # We didnt select a piece with that mousedown, and we have a piece selected
-                    game.MovePiece(pygame.mouse.get_pos())
+                #if(game.WhiteTurn): # The players turn
+                    Opponent.EvaluateBoard(game.White, game.Black)
+                    selected = game.SelectPiece(pygame.mouse.get_pos())
+                    # Okay maybe trying to move
+                    if(game.CurrentlySelected != None and not selected): # We didnt select a piece with that mousedown, and we have a piece selected
+                        game.MovePiece(pygame.mouse.get_pos())
 
+        #if(not game.WhiteTurn):
+        #    move = Opponent.move(game.White, game.Black, True, game.PreviouslyMovingPiece, game.BlackCheck, game.WhiteCheck)
+        #    tmp = LegalMove.getPieceAtSquare(move[0].letter, move[0].number, game.Black)
+        #    if(tmp != None):
+        #        game.CurrentlySelected = tmp
+        #        game.MovePiece((move[1]*100, move[2]*100))
         clock.tick(30)
         drawWindow(game)
 

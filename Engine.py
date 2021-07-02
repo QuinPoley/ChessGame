@@ -115,7 +115,7 @@ def Eval(white, black):
     
     if(len(LegalWhiteKing) != 0):
         for x in range(len(LegalWhiteKing)):
-            if((LegalWhiteKing[x][0], LegalWhiteKing[x][1]) in listWhite):
+            if((LegalWhiteKing[x][0], LegalWhiteKing[x][1]) in listBlack):
                 WhiteSafety -= (5.0 / len(LegalWhiteKing)) # get to 0 for checkmate
 
     if((BlackKing.letter, BlackKing.number) in listWhite): # White is in check
