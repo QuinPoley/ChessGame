@@ -190,9 +190,13 @@ class GameOfChess():
 
     # True if valid move completed
     # False otherwise
-    def MovePiece(self, MouseLocation):
+    def MovePiece(self, MouseLocation, isSquareLocation):
         Piece = self.CurrentlySelected
-        Location = self.LocateMouseDown(MouseLocation)
+        Location = ()
+        if(isSquareLocation):
+            Location = MouseLocation
+        else:
+            Location = self.LocateMouseDown(MouseLocation)
         if((self.WhiteTurn and Piece.color == "black") or (not self.WhiteTurn and Piece.color == "white") or Piece == None):
             return False # Not your turn or no piece
         

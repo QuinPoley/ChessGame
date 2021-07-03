@@ -25,6 +25,7 @@ class Piece:
 class Pawn(Piece):
     def __init__(self, color, letter, number):
         super().__init__(color, letter, number)
+        self.value = 1
     
     def returnLegalMoves(self):
         legalmoves = []
@@ -51,6 +52,7 @@ class Pawn(Piece):
 class King(Piece):
     def __init__(self, color, letter, number):
         super().__init__(color, letter, number)
+        self.value = 100
 
     def returnLegalMoves(self):
         legalmoves = []
@@ -88,6 +90,7 @@ class King(Piece):
 class Queen(Piece):
     def __init__(self, color, letter, number):
         super().__init__(color, letter, number)
+        self.value = 10
 
     def returnLegalMoves(self):
         legalmoves = []
@@ -129,6 +132,7 @@ class Queen(Piece):
 class Bishop(Piece):
     def __init__(self, color, letter, number):
         super().__init__(color, letter, number)
+        self.value = 3
 
     def returnLegalMoves(self):
         legalmoves = []
@@ -160,6 +164,7 @@ class Bishop(Piece):
 class Knight(Piece):
     def __init__(self, color, letter, number):
         super().__init__(color, letter, number)
+        self.value = 3
     
     def returnLegalMoves(self):
         legalmoves = []
@@ -196,6 +201,7 @@ class Knight(Piece):
 class Rook(Piece):
     def __init__(self, color, letter, number):
         super().__init__(color, letter, number)
+        self.value = 5
 
     def returnLegalMoves(self):
         legalmoves = []
