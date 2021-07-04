@@ -55,6 +55,23 @@ class ComputerOpponent:
         WhiteMat, BlackMat, Control, WhiteSafe, BlackSafe = Engine.Eval(white, black)
         BoardState = ((BlackMat - WhiteMat) * 3) + Control + ((BlackSafe - WhiteSafe) * 2) - 1  # Default 0 More is great, less is bad
         return BoardState
+    
+    # ONLY GIVE THIS A COPY OF WHITE & BLACK
+    def FindWhiteBestMove(self, white, black, prev, BC, WC):
+        BestMoveForWhite = []
+        BestStateForWhite = 1000 # Really bad for white
+        for i in range(len(white)):
+            moves = white[i].returnLegalMoves()
+            for j in range(len(moves)):
+                if(LegalMove.isValid(moves[j][0], moves[j][1], white[i], black, white, prev, BC, WC) and not LegalMove.isCheckAfterMove(moves[j][0], moves[j][1], white[i], black, white)):
+                    previously = white[i].letter, white[i].number
+                    white[i].move(moves[j][0], moves[j][1])
+                    newvalue = self.EvaluateBoard(white, black)
+                    if(newvalue < BestStateForWhite):
+                        BestMoveForWhite = [white[i], moves[j][0], moves[j][1]]
+                        BestStateForWhite = newvalue
+                    white[j].letter, white[j].number = previously
+        return BestStateForWhite
 
     def FindBestMove(self, white, black, prev, BC, WC):
         CopyWhite = copy.deepcopy(white)
@@ -69,24 +86,14 @@ class ComputerOpponent:
                     wasJust = CopyBlack[x].letter, CopyBlack[x].number
                     CopyBlack[x].move(moves[i][0], moves[i][1])
                     value = self.EvaluateBoard(CopyWhite, CopyBlack)
-                    if(value > BestState):
+                    whiteresponse = self.FindWhiteBestMove(CopyWhite, CopyBlack, CopyBlack[x], BC, WC)
+                    if(whiteresponse > BestState):
                         BestMoveForBlack = [CopyBlack[x], moves[i][0], moves[i][1]]
-                        BestState = value
-                        for j in range(len(CopyWhite)):
-                            wmoves = CopyWhite[j].returnLegalMoves()
-                            for k in range(len(wmoves)):
-                                if(LegalMove.isValid(wmoves[k][0], wmoves[k][1], CopyWhite[j], CopyBlack, CopyWhite, prev, BC, WC) and not LegalMove.isCheckAfterMove(wmoves[k][0], wmoves[k][1], CopyBlack[x], CopyBlack, CopyWhite)):
-                                    previously = CopyWhite[j].letter, CopyWhite[j].number
-                                    CopyWhite[x].move(wmoves[k][0], wmoves[k][1])
-                                    newvalue = self.EvaluateBoard(CopyWhite, CopyBlack)
-                                    if(newvalue < BestState):
-                                        BestMoveForWhite = [CopyWhite[j], wmoves[k][0], wmoves[k][1]]
-                                        BestState = newvalue
-                                    CopyWhite[j].letter, CopyWhite[j].number = previously
+                        BestState = whiteresponse
                     CopyBlack[x].letter, CopyBlack[x].number = wasJust
 
         print(BestMoveForBlack[0].__str__()+ " " +str(BestMoveForBlack[1])+ " " +str(BestMoveForBlack[2]))
-        print(BestMoveForWhite[0].__str__()+ " " +str(BestMoveForWhite[1])+ " " +str(BestMoveForWhite[2]))
+        #print(BestMoveForWhite[0].__str__()+ " " +str(BestMoveForWhite[1])+ " " +str(BestMoveForWhite[2]))
         return BestMoveForBlack
 
     def move(self, white, black, computerisblack, lastPiecetoMove, blackcheck, whitecheck, movenumber):
@@ -96,8 +103,8 @@ class ComputerOpponent:
                 if(blackcheck): # Am I in check?
                      return self.getOutOfCheck(white, black, blackcheck, whitecheck, lastPiecetoMove)
                 else:
-                    if(movenumber <= 2):      # Use the openings I gave it
-                        piece = LegalMove.getPieceAtSquare(self.listofOpenings[self.selectedopening][((movenumber-1)*2)][0], self.listofOpenings[self.selectedopening][((movenumber-1)*2)][1], black)
-                        return [piece, self.listofOpenings[self.selectedopening][1+((movenumber-1)*2)][0], self.listofOpenings[self.selectedopening][1+((movenumber-1)*2)][1]]
+                    if(movenumber <= 4):      # Use the openings I gave it
+                        piece = LegalMove.getPieceAtSquare(self.listofOpenings[self.selectedopening][(movenumber-1)][0], self.listofOpenings[self.selectedopening][(movenumber-1)][1], black)
+                        return [piece, self.listofOpenings[self.selectedopening][(movenumber)][0], self.listofOpenings[self.selectedopening][(movenumber)][1]]
                     else: # Try to use the engine I wrote to find the best move
                         return self.FindBestMove(white, black, lastPiecetoMove, blackcheck, whitecheck)
